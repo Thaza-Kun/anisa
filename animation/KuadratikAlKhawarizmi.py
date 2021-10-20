@@ -21,7 +21,7 @@ class PersKhawarizmiPertama(Scene):
         COLC = GREEN
 
         COLSQR = RED
-        COLHALFB = COLSQR
+        COLHALFB = ORANGE
 
         COLC_OPACITY = 0.6
 
@@ -187,6 +187,13 @@ class PersKhawarizmiPertama(Scene):
                 )
             )
         
+        def highlight(Object: Mobject, color=YELLOW) -> Mobject:
+            mobject = Rectangle(
+                height=Object.height + 0.2,
+                width=Object.width + 0.2,
+                color=color,
+            ).move_to(Object.get_center())
+            return mobject
 
         ##############################
         # ANIMASI
@@ -286,12 +293,21 @@ class PersKhawarizmiPertama(Scene):
         mult = MathTex(r"\cross").move_to(mult_position)
         self.play(FadeIn(mult))
         self.play(Transform(pers_sementara, pers_lengkap[0]), FadeOut(mult))
+
+        x2_highlight = highlight(pers_lengkap[0], color=COLSQR)
+        # self.play(Create(x2_highlight), Create(Khawa_sqr_complete))
+        # self.play(FadeOut(x2_highlight), FadeOut(Khawa_sqr_complete))
+        
+
         self.play(Transform(KhawaSqrGroup.copy(), pers_lengkap_["c"], replace_mobject_with_target_in_scene=True))
         self.play(
             Transform(half_b_square.copy(), pers_lengkap_["halfb"], replace_mobject_with_target_in_scene=True), 
             FadeIn(pers_lengkap[2][1])
             )
-        self.play(FadeIn(pers_lengkap[1]))
-        # self.add(pers_lengkap)
+        sqr_highlight = highlight(pers_lengkap[2:], color=COLSQR)
+        # self.play(Create(sqr_highlight), Create(Khawa_sqr_complete))
+        # self.play(FadeOut(sqr_highlight), FadeOut(Khawa_sqr_complete))
+        
+        self.play(Create(sqr_highlight), Create(Khawa_sqr_complete), Create(x2_highlight))
+        self.play(FadeOut(sqr_highlight), FadeOut(Khawa_sqr_complete), FadeOut(x2_highlight), FadeIn(pers_lengkap[1]))
         self.wait(2)
-        self.wait(3)
