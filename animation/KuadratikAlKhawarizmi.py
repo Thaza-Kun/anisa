@@ -1,313 +1,348 @@
+"""
+Author  : Murthadza bin Aznam
+Date    : 2021-11-16
+"""
+
 from manim import *
-from numpy import half, square
+from numpy import ndarray
+from typing import List, Dict
 
-class PersKhawarizmiPertama(Scene):
+# Global Values
+# =============
 
-    def construct(self):
-        ##############################
-        # Constants and variables
-        TITLE = Text("Penyempurnaan Kuasa Dua Al-Khawarizmi").to_edge(UP)
-        SUBTITLE = Text("KAEDAH PERTAMA").next_to(TITLE, DOWN)
-        TitleGroup = VGroup(TITLE, SUBTITLE).scale(0.5)
+VALX = ValueTracker(1)
+VALB = ValueTracker(1.5)
 
-        VALX = ValueTracker(1)
-        VALB = ValueTracker(1.5)
-        VALC = always_redraw(lambda:
-            ValueTracker(VALX.get_value()**2 + VALB.get_value()*VALX.get_value())
-        )
+COLX = BLUE
+COLB = YELLOW
+COLC = GREEN
 
-        COLX = BLUE
-        COLB = YELLOW
-        COLC = GREEN
+COLSQR = RED
+COLHALFB = ORANGE
 
-        COLSQR = RED
-        COLHALFB = ORANGE
+COLC_OPACITY = 0.6
 
-        COLC_OPACITY = 0.6
+STROKE_WIDTH = DEFAULT_STROKE_WIDTH*2
 
-        STROKE_WIDTH = DEFAULT_STROKE_WIDTH*2
+dGAP = 0.037
 
-        dGAP = 0.037
-
-        ##############################
-        # OBJEK 1: Persamaan
-        pers = MathTex(r"x^2", "+", "bx", "=", "c")
-        pers.scale(2)
-        pers[0].set_color(COLX)
-        pers[2][0].set_color(COLB)
-        pers[2][1].set_color(COLX)
-        pers[4].set_color(COLC)
-
-        # Persamaan Akhir
-        pers_lengkap = MathTex("(x + b)^2","=",r"c + \frac{1}{2}b")
-        pers_lengkap.move_to(DOWN*3)
-
-        pers_lengkap_ = {
-            "x": pers_lengkap[0][1],
-            "b": pers_lengkap[0][3],
-            "c": pers_lengkap[2][0],
-            "halfb": pers_lengkap[2][2:]
-        }
-        pers_lengkap_["x"].set_color(COLX)
-        pers_lengkap_["b"].set_color(COLB)
-        pers_lengkap_["c"].set_color(COLC)
-        pers_lengkap_["halfb"].set_color(COLHALFB)
-
-        ##############################
-        # OBJEK 2: Segi Empat X
-        x_square = Square(
+class XSquare(Square):
+    def __init__(self, VALX: ValueTracker, move_to: ndarray = ORIGIN, update_size: bool = True):
+        super().__init__(
             side_length=VALX.get_value(),
-            color=COLC,
+            color= COLC,
             stroke_width = STROKE_WIDTH,
-            stroke_color = COLX
-        ).move_to(DOWN*2 + LEFT*1.5)
-        x_square.add_updater(lambda sqr: sqr.stretch_to_fit_height(VALX.get_value()))
-        x_square.add_updater(lambda sqr: sqr.stretch_to_fit_width(VALX.get_value()))
-
-        KhawaSqrGroup = VGroup()
-
-        ##############################
-        # OBJEK 3: Segi Empat B
-        def create_bx_rect(width: float = 1, opacity: float = 0):
-            main = Rectangle(
-                height=VALX.get_value(),
-                width=width*VALB.get_value(),
-                color=COLC,
-                stroke_width = STROKE_WIDTH,
-                stroke_color = COLB,
-                fill_opacity=opacity
-            )
-
-            vertex = main.get_vertices()
-
-            main.add_updater(lambda rect: rect.stretch_to_fit_height(VALX.get_value()))
-            main.add_updater(lambda rect: rect.stretch_to_fit_width(width*VALB.get_value()))
-
-            def vert_side(side, RectMobject):
-                GAP = [0,dGAP,0]
-                ret = always_redraw(lambda:
-                    Line(
-                        start   = RectMobject.get_corner(side + UP) + GAP,
-                        end     = RectMobject.get_corner(side + DOWN) - GAP,
-                        color   = COLX,
-                        stroke_width = STROKE_WIDTH
-                    )
-                )
-                return ret
-
-            def hori_side(side, RectMobject):
-                GAP = [dGAP,0,0]
-                ret = always_redraw(lambda:
-                    Line(
-                        start   = RectMobject.get_corner(LEFT + side) - GAP,
-                        end     = RectMobject.get_corner(RIGHT + side) + GAP,
-                        color   = COLB,
-                        stroke_width = STROKE_WIDTH
-                    )
-                )
-                return ret
-
-            side_xL = vert_side(LEFT, main)
-            side_xR = vert_side(RIGHT, main)
-            side_bT = hori_side(UP, main)
-            side_bB = hori_side(DOWN, main)
-
-            return VGroup(main, side_bT, side_bB, side_xL, side_xR)
-
-        BRectGroup = create_bx_rect(width=1)
-        BRectGroup.move_to(DOWN*2 + RIGHT*1.5)
-
-        # Bila dah jadi setengah
-        BRectLGroup = create_bx_rect(width=0.5, opacity=COLC_OPACITY)
-        BRectRGroup = create_bx_rect(width=0.5, opacity=COLC_OPACITY)
-
-        ##############################
-        # OBJEK 4: Segi Empat C
-
-        c_rect = Rectangle(
-            height=VALX.get_value(),
-            width=VALX.get_value() + VALB.get_value(),
-            color=COLC,
-            fill_opacity=COLC_OPACITY
-        ).move_to(DOWN*2)
-        c_rect.set_z_index(-1)
-        c_rect.add_updater(lambda rect: rect.stretch_to_fit_height(VALX.get_value()))
-        c_rect.add_updater(lambda rect: rect.stretch_to_fit_width(VALX.get_value() + VALB.get_value()))
-
-        ##############################
-        # OBJEK 5: Segi Empat Khawarizmi Lengkap
-
-        half_b_square = Square(
-            side_length=0.5*VALB.get_value(),
-            color=COLHALFB,
-            stroke_width=STROKE_WIDTH,
-            stroke_color = COLB,
-            fill_opacity = 1
+            stroke_color = COLX,
+            fill_opacity = 0
         )
-        half_b_square.add_updater(lambda sqr: sqr.stretch_to_fit_height(0.5*VALB.get_value()))
-        half_b_square.add_updater(lambda sqr: sqr.stretch_to_fit_width(0.5*VALB.get_value()))
+        self.move_to(move_to)
+        if update_size:
+            self.update_size(VALX)
 
-        ##############################
-        # OBJEK 6: Segi Empat Khawarizmi Lengkap
+    def update_size(self, VALX: ValueTracker):
+        self.add_updater(lambda sqr: sqr.stretch_to_fit_height(VALX.get_value()))
+        self.add_updater(lambda sqr: sqr.stretch_to_fit_width(VALX.get_value()))
+        return self
 
-        Khawa_sqr_complete = Square(
-            side_length=VALX.get_value() + 0.5*VALB.get_value(),
-            color=COLSQR,
-            stroke_width = STROKE_WIDTH
+    def make_opague(self):
+        self.set_opacity(COLC_OPACITY)
+        return self
+
+class BXRect(VGroup):
+    def __init__(self, VALX: ValueTracker, VALB: ValueTracker, move_to: ndarray = ORIGIN, width_proportion: float = 1, update_size: bool = True, show_color: bool =False):
+        self.width_proportion = width_proportion
+        if show_color:
+            opacity = COLC_OPACITY
+        else:
+            opacity = 0
+        self.main_rect = Rectangle(
+            height          = VALX.get_value(),
+            width           = self.width_proportion*VALB.get_value(),
+            color           = COLC,
+            stroke_width    = STROKE_WIDTH,
+            stroke_color    = COLB,
+            fill_opacity    = opacity
         )
-        Khawa_sqr_complete.add_updater(lambda sqr: sqr.stretch_to_fit_height(VALX.get_value() + 0.5*VALB.get_value()))
-        Khawa_sqr_complete.add_updater(lambda sqr: sqr.stretch_to_fit_width(VALX.get_value() + 0.5*VALB.get_value()))
-        Khawa_sqr_complete.move_to(ORIGIN + 0.5*DOWN)
+        super().__init__(self.main_rect)
+        self.add(*[self.color_vert_side(side) for side in (LEFT, RIGHT)])
+        self.add(*[self.color_hori_side(side) for side in (UP, DOWN)])
+        self.move_to(move_to)
+        if update_size:
+            self.update_size()
 
-        ##############################
-        # OBJEK: Fungsi tambahan
-        def update_lines(RectMobject: Rectangle, left:Line, right:Line, top: Line, bottom:Line) -> None:
-            top.add_updater(lambda ln: 
-                ln.set_points_by_ends(
-                    RectMobject.get_corner(LEFT + UP) + dGAP*LEFT,
-                    RectMobject.get_corner(RIGHT + UP) + dGAP*RIGHT,
+    def color_vert_side(self, side: ndarray):
+        GAP = [0, dGAP, 0]
+        vert = always_redraw(lambda:
+            Line(
+                    start   = self.main_rect.get_corner(side + UP) + GAP,
+                    end     = self.main_rect.get_corner(side + DOWN) - GAP,
+                    color   = COLX,
+                    stroke_width = STROKE_WIDTH
                 )
+        )
+        return vert
+
+    def color_hori_side(self, side: ndarray):
+        GAP = [dGAP, 0, 0]
+        hori = always_redraw(lambda:
+            Line(
+                    start   = self.main_rect.get_corner(LEFT + side) - GAP,
+                    end     = self.main_rect.get_corner(RIGHT + side) + GAP,
+                    color   = COLB,
+                    stroke_width = STROKE_WIDTH
             )
-            bottom.add_updater(lambda ln: 
-                ln.set_points_by_ends(
-                    RectMobject.get_corner(LEFT + DOWN) + dGAP*LEFT,
-                    RectMobject.get_corner(RIGHT + DOWN) + dGAP*RIGHT,
-                )
-            )
-            left.add_updater(lambda ln: 
-                ln.set_points_by_ends(
-                    RectMobject.get_corner(LEFT + UP) + dGAP*UP,
-                    RectMobject.get_corner(LEFT + DOWN) + dGAP*UP,
-                )
-            )
-            right.add_updater(lambda ln: 
-                ln.set_points_by_ends(
-                    RectMobject.get_corner(RIGHT + UP) + dGAP*UP,
-                    RectMobject.get_corner(RIGHT + DOWN) + dGAP*UP,
-                )
-            )
+        )
+        return hori
+    
+    def update_size(self):
+        self.main_rect.add_updater(lambda rect: rect.stretch_to_fit_height(VALX.get_value()))
+        self.main_rect.add_updater(lambda rect: rect.stretch_to_fit_width(self.width_proportion*VALB.get_value()))
+        return self
+
+class HalfBRect(BXRect):
+    def __init__(self, VALX: ValueTracker, VALB: ValueTracker, move_to: ndarray = ORIGIN,width_ratio: float = 0.5):
+        super().__init__(VALX, VALB, move_to=move_to, width_proportion=width_ratio, show_color=True)
+
+class CRect(Rectangle):
+    def __init__(self, VALX: ValueTracker, VALB: ValueTracker, move_to: ndarray = ORIGIN, update_size: bool = True):
+        super().__init__(
+            height          = VALX.get_value(),
+            width           = VALX.get_value() + VALB.get_value(),
+            color           = COLC,
+            fill_opacity    = COLC_OPACITY,
+            stroke_width    = 0
+        )
+        self.move_to(move_to)
+        if update_size:
+            self.update_size(VALX, VALB)
+
+    def update_size(self, VALX: ValueTracker, VALB: ValueTracker):
+        self.add_updater(lambda rect: rect.stretch_to_fit_height(VALX.get_value()))
+        self.add_updater(lambda rect: rect.stretch_to_fit_width(VALX.get_value() + VALB.get_value()))
+        return self
+
+class HalfBSquare(Square):
+    def __init__(self, VALB: ValueTracker, move_to: ndarray = ORIGIN, update_size: bool = True):
+        super().__init__(
+            side_length     = 0.5*VALB.get_value(),
+            color           = COLHALFB,
+            stroke_width    = STROKE_WIDTH,
+            stroke_color    = COLB,
+            fill_opacity    = 1
+        )
+        self.move_to(move_to)
+        if update_size:
+            self.update_size(VALB)
+
+    def update_size(self, VALB: ValueTracker):
+        self.add_updater(lambda sqr: sqr.stretch_to_fit_height(0.5*VALB.get_value()))
+        self.add_updater(lambda sqr: sqr.stretch_to_fit_width(0.5*VALB.get_value()))
+        return self
+
+class TitleGroup(VGroup):
+    def __init__(self, subtitle: str):
+        self.title(subtitle)
+        super().__init__(self.TITLE, self.SUBTITLE)
+        self.scale(0.5)
+
+    def title(self, subtitle: str):
+        self.TITLE = Text("Penyempurnaan Kuasa Dua Al-Khawarizmi").to_edge(UP)
+        self.SUBTITLE = Text(subtitle).next_to(self.TITLE, DOWN)
+        return self
+
+class PersAwal(MathTex):
+    equations: Dict[int, Dict[str, int]] = {
+        1: {"X": 0, "B":2, "C":4},
+        2: {"X": 0, "B":4, "C":2},
+        3: {"X": 0, "B":2, "C":4}
+    }
+    def __init__(self, eq_num: int):
+        if eq_num == 1:
+            equation = [r"x^2", "+", "bx",  "=", "c"]
+        elif eq_num == 2:
+            equation = [r"x^2", "+", "c", "=" ,"bx"]
+        elif eq_num == 3:
+            equation = [r"x^2", "=", "bx",  "+", "c"]
+        else:
+            equation = [""]
+        idx = self.equations[eq_num]
+        super().__init__(*equation)
+        self.scale(2)
+        self[idx["X"]].set_color(COLX)
+        self[idx["B"]][0].set_color(COLB)
+        self[idx["B"]][1].set_color(COLX)
+        self[idx["C"]].set_color(COLC)
+
+class PersAkhir(MathTex):
+    def __init__(self, eq_num: int, move_to: ndarray = ORIGIN):
+        if eq_num == 1:
+            equation = [r"(x + b)^2", "=", r"c + \frac{1}{2}b"]
+            equation_ = {
+                "x": equation[0][1],
+                "b": equation[0][3],
+                "c": equation[2][0],
+                "halfb": equation[2][2:]
+            }
+        elif eq_num == 2:
+            equation = [""]
+        elif eq_num == 3:
+            equation = [""]
+        else:
+            equation = [""]
+
+        super().__init__(*equation)
+        if eq_num == 1:
+            equation_ = {
+                "x": self[0][1],
+                "b": self[0][3],
+                "c": self[2][0],
+                "halfb": self[2][2:]
+            }
+        elif eq_num == 2:
+            equation = [""]
+        elif eq_num == 3:
+            equation = [""]
+        else:
+            equation = [""]
+        equation_["x"].set_color(COLX)
+        equation_["b"].set_color(COLB)
+        equation_["c"].set_color(COLC)
+        equation_["halfb"].set_color(COLHALFB)
+        self.equation_ = equation_
+        self.move_to(move_to)
+
+    def get_parts(self):
+        return self.equation_
+
+
+# Animation Classes
+class PenyelesaianKhawarizmiPertama(Scene):
+    def construct(self):
+        Title = self.add_title()
+        persAwal = self.fade_in_equation()
+        KhawaSqrGroup = self.eq_to_geometry(persAwal, x_sqr:=XSquare(VALX, move_to=DOWN*2+LEFT*2.5), b_rect:= BXRect(VALX, VALB, move_to=DOWN*2))
+        self.reposition_items(persAwal, KhawaSqrGroup, Title)
+        self.divide_b_rect(KhawaSqrGroup[1])
+        self.reveal_halved_b_rects(KhawaSqrGroup)
+        self.solve_geometry(KhawaSqrGroup)
+        pelengkap = self.complete_the_square(KhawaSqrGroup)
+        self.geometry_to_eq(KhawaSqrGroup, pers_akhir:=PersAkhir(1, move_to=RIGHT*3 + UP*0.5))
+        self.wait(3)
+
+    def add_title(self):
+        title = TitleGroup("Kaedah Pertama")
+        self.add(title)
+        return title
+
+    def fade_in_equation(self):
+        equation = PersAwal(1)
+        self.play(FadeIn(equation))
+        return equation
+
+    def eq_to_geometry(self, equation, x_sqr, BRectGroup):
+        self.play(Transform(equation[0].copy(), x_sqr, replace_mobject_with_target_in_scene=True))
+        self.play(Transform(equation[2][0].copy(), BRectGroup - BRectGroup[3:], replace_mobject_with_target_in_scene=True),
+            Transform(equation[2][1].copy(), BRectGroup[3:], replace_mobject_with_target_in_scene=True))
+        self.play(x_sqr.animate.move_to(DOWN*2 + LEFT*0.625 + LEFT*0.1435), BRectGroup.animate.move_to(DOWN*2 + RIGHT*0.625 + LEFT*0.1435))
         
-        def highlight(Object: Mobject, color=YELLOW) -> Mobject:
-            mobject = Rectangle(
-                height=Object.height + 0.2,
-                width=Object.width + 0.2,
-                color=color,
-            ).move_to(Object.get_center())
-            return mobject
-
-        ##############################
-        # ANIMASI
-        ##############################
-        self.add(TitleGroup)
-        self.play(FadeIn(pers))
-
-        # Pertunjukan X dan B adalah sisi segi empat
-        self.play(Transform(pers[0].copy(), x_square, replace_mobject_with_target_in_scene=True))
-        self.play(Transform(pers[2][0].copy(), BRectGroup - BRectGroup[3:], replace_mobject_with_target_in_scene=True),
-            Transform(pers[2][1].copy(), BRectGroup[3:], replace_mobject_with_target_in_scene=True))
-        self.play(x_square.animate.move_to(DOWN*2 + LEFT*0.625 + LEFT*0.1435), BRectGroup.animate.move_to(DOWN*2 + RIGHT*0.625 + LEFT*0.1435))
-        KhawaSqrGroup.add(x_square, BRectGroup)
-
-        # C ialah luas semuanya
-        self.play(Transform(pers[4].copy(), c_rect, replace_mobject_with_target_in_scene=True))
-        x_square.set_opacity(COLC_OPACITY)
+        self.play(Transform(equation[4].copy(), c:= CRect(VALX, VALB, move_to=DOWN*2), replace_mobject_with_target_in_scene=True))
+        x_sqr.set_opacity(COLC_OPACITY)
         BRectGroup[0].set_opacity(COLC_OPACITY)
-        self.remove(c_rect)
+        self.remove(c)
+        KhawaSqrGroup = VGroup(x_sqr, BRectGroup)
+        return KhawaSqrGroup
 
-        # Repositioning
+    def reposition_items(self, equation: MathTex, KhawaSqrGroup: VGroup, Title: VGroup):
+        x_square, BRectGroup = KhawaSqrGroup
         x_square.add_updater(lambda sqr: sqr.next_to(BRectGroup, LEFT, buff=0))
-        self.play(pers.animate.scale(0.5),
+        self.play(equation.animate.scale(0.5),
                 VALX.animate.set_value(2),
                 VALB.animate.set_value(2.5),
                 BRectGroup[0].animate.move_to(DOWN*2 + RIGHT*2*0.625 + LEFT*2*0.1435)
                 )
         *others , follow_rect = x_square.get_updaters() 
         x_square.remove_updater(follow_rect)
-        self.play(pers.animate.next_to(TitleGroup, DOWN),
+        self.play(equation.animate.next_to(Title, DOWN),
                 KhawaSqrGroup.animate.move_to(ORIGIN + DOWN))
 
-        # b Bahagi Dua
+    def divide_b_rect(self, BRectGroup):
         dividerDash = DashedLine(
-                    start=BRectGroup[1].get_midpoint() + dGAP*UP,
-                    end=BRectGroup[2].get_midpoint() + dGAP*DOWN,
+                    start=BRectGroup[3].get_midpoint() + dGAP*UP,
+                    end=BRectGroup[4].get_midpoint() + dGAP*DOWN,
                     color=COLX,
                     stroke_width=STROKE_WIDTH,
                     dash_length=DEFAULT_DASH_LENGTH*2.5
                     )
         dividerLine = Line(
-                    start=BRectGroup[1].get_midpoint() + dGAP*UP,
-                    end=BRectGroup[2].get_midpoint() + dGAP*DOWN,
+                    start=BRectGroup[3].get_midpoint() + dGAP*UP,
+                    end=BRectGroup[4].get_midpoint() + dGAP*DOWN,
                     color=COLX,
                     stroke_width=STROKE_WIDTH
                     )
         self.play(Create(dividerDash))
         self.play(Create(dividerLine))
+        self.remove(dividerDash, dividerLine)
 
-        BRectLGroup[0].add_updater(lambda rect: rect.next_to(x_square, RIGHT, buff=0.02))
-        BRectRGroup[0].next_to(BRectGroup[4], LEFT)
-        self.add(BRectLGroup, BRectRGroup)
-        self.remove(BRectGroup, dividerDash, dividerLine)
-        KhawaSqrGroup.remove(BRectGroup)
+    def reveal_halved_b_rects(self, KhawaSqrGroup: VGroup):
+        position = KhawaSqrGroup[1].get_center()
+        BRectLGroup = HalfBRect(VALX, VALB, move_to=position + LEFT*(1/4)*VALB.get_value())
+        BRectRGroup = HalfBRect(VALX, VALB, move_to=position + RIGHT*(1/4)*VALB.get_value())
+        KhawaSqrGroup.remove(rect:=KhawaSqrGroup[1])
+        self.add(BRectRGroup, BRectLGroup)
+        self.remove(rect)
         KhawaSqrGroup.add(BRectLGroup, BRectRGroup)
 
-        # bawa setengah b melekat di bawah x
-        self.play(BRectRGroup[0].animate.shift(DOWN), x_square.animate.shift(UP))
-        # restore_updater = BRectRGroup.get_updaters()
-        BRectRGroup.clear_updaters()
-        self.play(Rotate(BRectRGroup, 0.5*PI))
-        self.play(BRectRGroup.animate.next_to(x_square, DOWN, buff=0))
+    def solve_geometry(self, KhawaSqrGroup: VGroup):
+        main_geometry = KhawaSqrGroup[:-1]
+        free_geometry = KhawaSqrGroup[-1]
+        self.play(free_geometry.animate.shift(DOWN), main_geometry.animate.shift(UP))
+        free_geometry.clear_updaters()
+        self.play(Rotate(free_geometry, 0.5*PI))
+        self.play(free_geometry.animate.next_to(main_geometry[0], DOWN, buff=0))
+        self.play(KhawaSqrGroup.animate.move_to(ORIGIN + DOWN))
 
-        # Reposition the incomplete square
-        *rest, follow_x = BRectLGroup[0].get_updaters()
-        BRectLGroup[0].remove_updater(follow_x)
-        BRectLGroup[0].add_updater(lambda rect: rect.move_to(x_square.get_center() + (VALX.get_value()-0.1)*RIGHT))
-        *rest, follow_x = BRectLGroup[0].get_updaters()
-        BRectLGroup[0].remove_updater(follow_x)
-        update_lines(*BRectRGroup)
-        BRectRGroup[0].add_updater(lambda rect: rect.move_to(x_square.get_center() + (VALX.get_value()-0.1)*DOWN))
-        *rest, follow_x = BRectRGroup[0].get_updaters()
-        BRectRGroup.clear_updaters()
-        self.play(KhawaSqrGroup.animate.move_to(Khawa_sqr_complete.get_center()))
+    def complete_the_square(self, KhawaSqrGroup: VGroup):
+        half_b_sqr = HalfBSquare(VALB)
+        half_b_sqr.next_to(KhawaSqrGroup[2], RIGHT, buff=0)
+        self.play(Create(half_b_sqr))
+        KhawaSqrGroup.add(half_b_sqr)
+        return half_b_sqr
 
-        # Completing the Square
-        half_b_square.move_to(x_square.get_center() + (0.5*VALX.get_value() + 0.25*VALB.get_value() + 0.03)*(DOWN + RIGHT) + 0.01*LEFT + 0.01*DOWN)
-        self.remove(BRectRGroup[1:])
-        self.play(Create(Khawa_sqr_complete), run_time=2)
-        self.play(FadeOut(Khawa_sqr_complete), FadeIn(half_b_square))
-        b_side_R, b_side_D = BRectRGroup[2].copy().shift(0.5*VALB.get_value()*RIGHT), BRectLGroup[2].copy().shift(0.5*VALB.get_value()*DOWN)
-        
-        # Terjemah menjadi persamaan
+    def geometry_to_eq(self, KhawaSqrGroup: VGroup, equation: PersAkhir):
+        def highlight(Object: Mobject, color=COLSQR, gap: float = 0.2, stroke_proportion: int = 0.5) -> Mobject:
+            mobject = Rectangle(
+                height=Object.height + gap,
+                width=Object.width + gap,
+                color=color,
+                stroke_width = stroke_proportion*STROKE_WIDTH
+            ).move_to(Object.get_center())
+            return mobject
+        self.play(KhawaSqrGroup.animate.shift(LEFT*2))
+
+        b_Down = KhawaSqrGroup[2]
+        b_Right = KhawaSqrGroup[1]
+        b_side_R = b_Down[4].copy().shift(0.5*VALB.get_value()*RIGHT)
+        b_side_D = b_Right[4].copy().shift(0.5*VALB.get_value()*DOWN)
+
+        equation_ = equation.get_parts()
+
         self.add(b_side_D, b_side_R)
         self.play(
-            Transform(BRectRGroup[3].copy(), pers_lengkap_["x"]), 
-            Transform(b_side_D, pers_lengkap_["b"]), 
-            Create(pers_lengkap[0][2])
-            )
-        pers_sementara = VGroup(pers_lengkap_["x"].copy(), pers_lengkap[0][2].copy(), pers_lengkap_["b"].copy()).shift(2*RIGHT)
+            Transform(b_Down[1].copy(), equation_["x"]), 
+            Transform(b_side_D, equation_["b"]), 
+            GrowFromCenter(equation[0][2])
+        )
         self.play(
-            Transform(BRectLGroup[4].copy(), pers_sementara[0], replace_mobject_with_target_in_scene=True), 
-            Transform(b_side_R, pers_sementara[2], replace_mobject_with_target_in_scene=True),
-            FadeIn(pers_sementara[1])
-            )
-        mult_position = (pers_sementara.get_center() + pers_sementara.copy().shift(-2*RIGHT).get_center()) / 2
-        mult = MathTex(r"\cross").move_to(mult_position)
-        self.play(FadeIn(mult))
-        self.play(Transform(pers_sementara, pers_lengkap[0]), FadeOut(mult))
+            Transform(b_Right[2].copy(), equation[0][0]), 
+            Transform(b_side_R, equation[0][4:]),
+        )
 
-        x2_highlight = highlight(pers_lengkap[0], color=COLSQR)
-        # self.play(Create(x2_highlight), Create(Khawa_sqr_complete))
-        # self.play(FadeOut(x2_highlight), FadeOut(Khawa_sqr_complete))
-        
+        self.play(Transform(KhawaSqrGroup[0:3].copy(), equation_["c"], replace_mobject_with_target_in_scene=True))
+        self.play(Transform(KhawaSqrGroup[3].copy(), equation_["halfb"], replace_mobject_with_target_in_scene=True))
+        self.play(GrowFromCenter(equation[2][1]))
 
-        self.play(Transform(KhawaSqrGroup.copy(), pers_lengkap_["c"], replace_mobject_with_target_in_scene=True))
-        self.play(
-            Transform(half_b_square.copy(), pers_lengkap_["halfb"], replace_mobject_with_target_in_scene=True), 
-            FadeIn(pers_lengkap[2][1])
-            )
-        sqr_highlight = highlight(pers_lengkap[2:], color=COLSQR)
-        # self.play(Create(sqr_highlight), Create(Khawa_sqr_complete))
-        # self.play(FadeOut(sqr_highlight), FadeOut(Khawa_sqr_complete))
-        
-        self.play(Create(sqr_highlight), Create(Khawa_sqr_complete), Create(x2_highlight))
-        self.play(FadeOut(sqr_highlight), FadeOut(Khawa_sqr_complete), FadeOut(x2_highlight), FadeIn(pers_lengkap[1]))
-        self.wait(2)
+        hglt = highlight(KhawaSqrGroup, gap=0, stroke_proportion=1)
+        self.play(Create(hglt))
+        self.play(Transform(hglt, highlight(equation[0])))
+        self.play(Transform(hglt, highlight(equation[2:])))
+        self.play(FadeOut(hglt), GrowFromCenter(equation[1]))
