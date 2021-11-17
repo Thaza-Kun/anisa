@@ -26,6 +26,9 @@ STROKE_WIDTH = DEFAULT_STROKE_WIDTH*2
 
 dGAP = 0.037
 
+# Object Classes
+# ==============
+
 class XSquare(Square):
     def __init__(self, VALX: ValueTracker, move_to: ndarray = ORIGIN, update_size: bool = True):
         super().__init__(
@@ -216,17 +219,19 @@ class PersAkhir(MathTex):
 
 
 # Animation Classes
+# =================
 class PenyelesaianKhawarizmiPertama(Scene):
     def construct(self):
         Title = self.add_title()
         persAwal = self.fade_in_equation()
-        KhawaSqrGroup = self.eq_to_geometry(persAwal, x_sqr:=XSquare(VALX, move_to=DOWN*2+LEFT*2.5), b_rect:= BXRect(VALX, VALB, move_to=DOWN*2))
+        KhawaSqrGroup = self.eq_to_geometry(persAwal, XSquare(VALX, move_to=DOWN*2+LEFT*2.5), BXRect(VALX, VALB, move_to=DOWN*2))
         self.reposition_items(persAwal, KhawaSqrGroup, Title)
         self.divide_b_rect(KhawaSqrGroup[1])
         self.reveal_halved_b_rects(KhawaSqrGroup)
         self.solve_geometry(KhawaSqrGroup)
-        pelengkap = self.complete_the_square(KhawaSqrGroup)
-        self.geometry_to_eq(KhawaSqrGroup, pers_akhir:=PersAkhir(1, move_to=RIGHT*3 + UP*0.5))
+        self.complete_the_square(KhawaSqrGroup)
+        self.geometry_to_eq(KhawaSqrGroup, PersAkhir(1, move_to=RIGHT*3 + UP*0.5))
+        self.solve_final_eq()
         self.wait(3)
 
     def add_title(self):
@@ -302,10 +307,19 @@ class PenyelesaianKhawarizmiPertama(Scene):
         self.play(KhawaSqrGroup.animate.move_to(ORIGIN + DOWN))
 
     def complete_the_square(self, KhawaSqrGroup: VGroup):
+        def highlight(Object: Mobject, color=COLSQR, gap: float = 0, stroke_proportion: int = 1) -> Mobject:
+            mobject = Rectangle(
+                height=Object.height + gap,
+                width=Object.width + gap,
+                color=color,
+                stroke_width = stroke_proportion*STROKE_WIDTH
+            ).move_to(Object.get_center())
+            return mobject
         half_b_sqr = HalfBSquare(VALB)
         half_b_sqr.next_to(KhawaSqrGroup[2], RIGHT, buff=0)
-        self.play(Create(half_b_sqr))
         KhawaSqrGroup.add(half_b_sqr)
+        self.play(Create(hglt:=highlight(KhawaSqrGroup)), Create(half_b_sqr))
+        self.play(FadeOut(hglt))
         return half_b_sqr
 
     def geometry_to_eq(self, KhawaSqrGroup: VGroup, equation: PersAkhir):
@@ -317,7 +331,7 @@ class PenyelesaianKhawarizmiPertama(Scene):
                 stroke_width = stroke_proportion*STROKE_WIDTH
             ).move_to(Object.get_center())
             return mobject
-        self.play(KhawaSqrGroup.animate.shift(LEFT*2))
+        self.play(KhawaSqrGroup.animate.shift(LEFT*2.3))
 
         b_Down = KhawaSqrGroup[2]
         b_Right = KhawaSqrGroup[1]
@@ -346,3 +360,6 @@ class PenyelesaianKhawarizmiPertama(Scene):
         self.play(Transform(hglt, highlight(equation[0])))
         self.play(Transform(hglt, highlight(equation[2:])))
         self.play(FadeOut(hglt), GrowFromCenter(equation[1]))
+
+    def solve_final_eq():
+        pass

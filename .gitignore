@@ -1,6 +1,9 @@
 # Ignore media to save space
 media
 
+# Ignore test file
+*_-_.py
+
 # Ignore vscode settings
 .vscode
 
