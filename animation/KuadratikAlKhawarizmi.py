@@ -1,6 +1,7 @@
 """
 Author  : Murthadza bin Aznam
 Date    : 2021-11-16
+Manim   : v0.12.0
 """
 
 from manim import *
@@ -176,16 +177,10 @@ class PersAwal(MathTex):
         self[idx["B"]][1].set_color(COLX)
         self[idx["C"]].set_color(COLC)
 
-class PersAkhir(MathTex):
+class PersGeometri(MathTex):
     def __init__(self, eq_num: int, move_to: ndarray = ORIGIN):
         if eq_num == 1:
             equation = [r"(x + b)^2", "=", r"c + \frac{1}{2}b"]
-            equation_ = {
-                "x": equation[0][1],
-                "b": equation[0][3],
-                "c": equation[2][0],
-                "halfb": equation[2][2:]
-            }
         elif eq_num == 2:
             equation = [""]
         elif eq_num == 3:
@@ -196,9 +191,13 @@ class PersAkhir(MathTex):
         super().__init__(*equation)
         if eq_num == 1:
             equation_ = {
+                "sqr_x": VGroup(self[0][0], self[0][4:]),
                 "x": self[0][1],
+                "sign_x_plus_b": self[0][2],
                 "b": self[0][3],
+                "=": self[1],
                 "c": self[2][0],
+                "sign_c_plus_halfb": self[2][1],
                 "halfb": self[2][2:]
             }
         elif eq_num == 2:
@@ -217,21 +216,82 @@ class PersAkhir(MathTex):
     def get_parts(self):
         return self.equation_
 
+    def get_pivot_point(self):
+        return self.equation_["="].get_center()
+
+    def pivot_to(self, pivot_point: ndarray):
+        self.move_to(pivot_point - self.get_pivot_point())
+
+    def pivot_with_shift(self, pivot_point: ndarray = ORIGIN, shift: ndarray = DOWN):
+        self.pivot_to(pivot_point)
+        self.shift(shift)
+
+class PersAkhir(MathTex):
+    def __init__(self, eq_num: int, move_to: ndarray = ORIGIN):
+        if eq_num == 1:
+            equation = [r"x", "=", r"-b + \sqrt{c + \frac{1}{2}b}"]
+        elif eq_num == 2:
+            equation = [""]
+        elif eq_num == 3:
+            equation = [""]
+        else:
+            equation = [""]
+
+        super().__init__(*equation)
+        if eq_num == 1:
+            equation_ = {
+                "x": self[0],
+                "=": self[1],
+                "sign_b": self[2][0],
+                "b": self[2][1],
+                "sign_b_plus_c": self[2][2],
+                "sqrt": self[2][3:5],
+                "c": self[2][5],
+                "sign_c_plus_halfb": self[2][6],
+                "halfb": self[2][7:],
+            }
+        elif eq_num == 2:
+            equation = [""]
+        elif eq_num == 3:
+            equation = [""]
+        else:
+            equation = [""]
+        equation_["x"].set_color(COLX)
+        equation_["b"].set_color(COLB)
+        equation_["c"].set_color(COLC)
+        equation_["halfb"].set_color(COLHALFB)
+        self.equation_ = equation_
+        self.move_to(move_to)
+
+    def get_parts(self):
+        return self.equation_
+
+    def get_pivot_point(self):
+        return self.equation_["="].get_center()
+
+    def pivot_to(self, pivot_point: ndarray):
+        self.move_to(pivot_point - self.get_pivot_point())
+
+    def pivot_with_shift(self, pivot_point: ndarray = ORIGIN, shift: ndarray = DOWN):
+        self.pivot_to(pivot_point)
+        self.shift(shift)
+
 
 # Animation Classes
 # =================
 class PenyelesaianKhawarizmiPertama(Scene):
     def construct(self):
         Title = self.add_title()
-        persAwal = self.fade_in_equation()
-        KhawaSqrGroup = self.eq_to_geometry(persAwal, XSquare(VALX, move_to=DOWN*2+LEFT*2.5), BXRect(VALX, VALB, move_to=DOWN*2))
-        self.reposition_items(persAwal, KhawaSqrGroup, Title)
+        pers_awal = self.fade_in_equation()
+        KhawaSqrGroup = self.eq_to_geometry(pers_awal, XSquare(VALX, move_to=DOWN*2+LEFT*2.5), BXRect(VALX, VALB, move_to=DOWN*2))
+        self.reposition_items(pers_awal, KhawaSqrGroup, Title)
         self.divide_b_rect(KhawaSqrGroup[1])
         self.reveal_halved_b_rects(KhawaSqrGroup)
         self.solve_geometry(KhawaSqrGroup)
         self.complete_the_square(KhawaSqrGroup)
-        self.geometry_to_eq(KhawaSqrGroup, PersAkhir(1, move_to=RIGHT*3 + UP*0.5))
-        self.solve_final_eq()
+        pers_geometri = self.geometry_to_eq(KhawaSqrGroup, PersGeometri(1, move_to=RIGHT*3 + UP*0.5))
+        pers_jawapan = self.solve_final_eq(pers_geometri)
+        self.finalize_scene(pers_awal, pers_geometri, pers_jawapan, geometri=KhawaSqrGroup)
         self.wait(3)
 
     def add_title(self):
@@ -322,7 +382,7 @@ class PenyelesaianKhawarizmiPertama(Scene):
         self.play(FadeOut(hglt))
         return half_b_sqr
 
-    def geometry_to_eq(self, KhawaSqrGroup: VGroup, equation: PersAkhir):
+    def geometry_to_eq(self, KhawaSqrGroup: VGroup, equation: PersGeometri):
         def highlight(Object: Mobject, color=COLSQR, gap: float = 0.2, stroke_proportion: int = 0.5) -> Mobject:
             mobject = Rectangle(
                 height=Object.height + gap,
@@ -344,22 +404,68 @@ class PenyelesaianKhawarizmiPertama(Scene):
         self.play(
             Transform(b_Down[1].copy(), equation_["x"]), 
             Transform(b_side_D, equation_["b"]), 
-            GrowFromCenter(equation[0][2])
+            GrowFromCenter(equation_["sign_x_plus_b"])
         )
         self.play(
-            Transform(b_Right[2].copy(), equation[0][0]), 
-            Transform(b_side_R, equation[0][4:]),
+            Transform(b_Right[2].copy(), equation_["sqr_x"][0]), 
+            Transform(b_side_R, equation_["sqr_x"][1]),
         )
 
         self.play(Transform(KhawaSqrGroup[0:3].copy(), equation_["c"], replace_mobject_with_target_in_scene=True))
         self.play(Transform(KhawaSqrGroup[3].copy(), equation_["halfb"], replace_mobject_with_target_in_scene=True))
-        self.play(GrowFromCenter(equation[2][1]))
+        self.play(GrowFromCenter(equation_["sign_c_plus_halfb"]))
 
         hglt = highlight(KhawaSqrGroup, gap=0, stroke_proportion=1)
         self.play(Create(hglt))
         self.play(Transform(hglt, highlight(equation[0])))
         self.play(Transform(hglt, highlight(equation[2:])))
-        self.play(FadeOut(hglt), GrowFromCenter(equation[1]))
+        self.play(FadeOut(hglt), GrowFromCenter(equation_["="]))
+        return equation
 
-    def solve_final_eq():
+    def solve_final_eq(self, original_eq: MathTex):
+        awal = original_eq.copy()
+        akhir = PersAkhir(eq_num=1)
+
+        self.add(awal)
+        self.play(awal.animate.shift(DOWN*2))
+
+        akhir.pivot_to(awal.get_pivot_point())
+        awal_ = awal.get_parts()
+        akhir_ = akhir.get_parts()
+
+        self.play(
+            Transform(
+                VGroup(awal_["c"], awal_["sign_c_plus_halfb"], awal_["halfb"]), 
+                VGroup(akhir_["c"], akhir_["sign_c_plus_halfb"], akhir_["halfb"]), 
+                replace_mobject_with_target_in_scene=True),
+            Transform(
+                awal_["sqr_x"],
+                akhir_["sqrt"],
+                replace_mobject_with_target_in_scene=True
+                )
+            )
+        self.play(
+            Transform(
+                awal_["b"],
+                akhir_["b"],
+                replace_mobject_with_target_in_scene=True
+                ),
+            FadeIn(akhir_["sign_b"], akhir_["sign_b_plus_c"]),
+            FadeOut(awal_["sign_x_plus_b"]),
+            Transform(
+                awal_["x"],
+                akhir_["x"],
+                replace_mobject_with_target_in_scene=True
+            ),
+            Transform(
+                awal_["="],
+                akhir_["="],
+                replace_mobject_with_target_in_scene=True
+            )
+        )
+
+        self.play(akhir.animate.shift(LEFT*1.5))
+        return akhir
+
+    def finalize_scene(self, pers_awal, pers_geometri, pers_jawapan, geometri):
         pass
