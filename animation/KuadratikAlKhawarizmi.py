@@ -6,7 +6,7 @@ Manim   : v0.12.0
 
 from manim import *
 from numpy import ndarray
-from typing import List, Dict
+from typing import Dict
 
 # Global Values
 # =============
@@ -180,7 +180,7 @@ class PersAwal(MathTex):
 class PersGeometri(MathTex):
     def __init__(self, eq_num: int, move_to: ndarray = ORIGIN):
         if eq_num == 1:
-            equation = [r"(x + b)^2", "=", r"c + \frac{1}{2}b"]
+            equation = [r"(x + \frac{1}{2}b)^2", "=", r"c + \frac{1}{2}b^2"]
         elif eq_num == 2:
             equation = [""]
         elif eq_num == 3:
@@ -191,14 +191,15 @@ class PersGeometri(MathTex):
         super().__init__(*equation)
         if eq_num == 1:
             equation_ = {
-                "sqr_x": VGroup(self[0][0], self[0][4:]),
+                "sqr_x": VGroup(self[0][0], self[0][7:]),
                 "x": self[0][1],
                 "sign_x_plus_b": self[0][2],
-                "b": self[0][3],
+                "half_b_free": self[0][3:6],
+                "b": self[0][6],
                 "=": self[1],
                 "c": self[2][0],
                 "sign_c_plus_halfb": self[2][1],
-                "halfb": self[2][2:]
+                "half_b_sqr": self[2][2:]
             }
         elif eq_num == 2:
             equation = [""]
@@ -209,7 +210,7 @@ class PersGeometri(MathTex):
         equation_["x"].set_color(COLX)
         equation_["b"].set_color(COLB)
         equation_["c"].set_color(COLC)
-        equation_["halfb"].set_color(COLHALFB)
+        equation_["half_b_sqr"].set_color(COLHALFB)
         self.equation_ = equation_
         self.move_to(move_to)
 
@@ -229,7 +230,7 @@ class PersGeometri(MathTex):
 class PersAkhir(MathTex):
     def __init__(self, eq_num: int, move_to: ndarray = ORIGIN):
         if eq_num == 1:
-            equation = [r"x", "=", r"-b + \sqrt{c + \frac{1}{2}b}"]
+            equation = [r"x", "=", r"-\frac{1}{2}b", "+", r"\sqrt{c + \frac{1}{2}b^2}"]
         elif eq_num == 2:
             equation = [""]
         elif eq_num == 3:
@@ -243,12 +244,13 @@ class PersAkhir(MathTex):
                 "x": self[0],
                 "=": self[1],
                 "sign_b": self[2][0],
-                "b": self[2][1],
-                "sign_b_plus_c": self[2][2],
-                "sqrt": self[2][3:5],
-                "c": self[2][5],
-                "sign_c_plus_halfb": self[2][6],
-                "halfb": self[2][7:],
+                "half_b_free": self[2][1:4],
+                "b": self[2][4],
+                "sign_b_plus_c": self[3],
+                "sqrt": self[4][0:2],
+                "c": self[4][2],
+                "sign_c_plus_halfb": self[4][3],
+                "half_b_sqr": self[4][4:],
             }
         elif eq_num == 2:
             equation = [""]
@@ -259,7 +261,7 @@ class PersAkhir(MathTex):
         equation_["x"].set_color(COLX)
         equation_["b"].set_color(COLB)
         equation_["c"].set_color(COLC)
-        equation_["halfb"].set_color(COLHALFB)
+        equation_["half_b_sqr"].set_color(COLHALFB)
         self.equation_ = equation_
         self.move_to(move_to)
 
@@ -281,15 +283,15 @@ class PersAkhir(MathTex):
 # =================
 class PenyelesaianKhawarizmiPertama(Scene):
     def construct(self):
+        # TODO Add name at the bottom of the screen
         Title = self.add_title()
         pers_awal = self.fade_in_equation()
         KhawaSqrGroup = self.eq_to_geometry(pers_awal, XSquare(VALX, move_to=DOWN*2+LEFT*2.5), BXRect(VALX, VALB, move_to=DOWN*2))
         self.reposition_items(pers_awal, KhawaSqrGroup, Title)
-        self.divide_b_rect(KhawaSqrGroup[1])
-        self.reveal_halved_b_rects(KhawaSqrGroup)
+        self.divide_b_rect(KhawaSqrGroup)
         self.solve_geometry(KhawaSqrGroup)
         self.complete_the_square(KhawaSqrGroup)
-        pers_geometri = self.geometry_to_eq(KhawaSqrGroup, PersGeometri(1, move_to=RIGHT*3 + UP*0.5))
+        pers_geometri = self.geometry_to_eq(KhawaSqrGroup, PersGeometri(1, move_to=RIGHT*2.5 + UP*0.5))
         pers_jawapan = self.solve_final_eq(pers_geometri)
         self.finalize_scene(pers_awal, pers_geometri, pers_jawapan, geometri=KhawaSqrGroup)
         self.wait(3)
@@ -330,7 +332,20 @@ class PenyelesaianKhawarizmiPertama(Scene):
         self.play(equation.animate.next_to(Title, DOWN),
                 KhawaSqrGroup.animate.move_to(ORIGIN + DOWN))
 
-    def divide_b_rect(self, BRectGroup):
+    def divide_b_rect(self, KhawaSqrGroup: VGroup):
+        BRectGroup = KhawaSqrGroup[1]
+
+        position = BRectGroup.get_center()
+        BRectLGroup = HalfBRect(VALX, VALB, move_to=position + LEFT*(1/4)*VALB.get_value())
+        BRectRGroup = HalfBRect(VALX, VALB, move_to=position + RIGHT*(1/4)*VALB.get_value())
+
+        halfb_textL = MathTex(r"\frac{1}{2}","b").scale(0.7)
+        halfb_textL[1].set_color(COLB)
+        halfb_textR = halfb_textL.copy()
+
+        halfb_textL.next_to(BRectLGroup, DOWN)
+        halfb_textR.next_to(BRectRGroup, DOWN)
+
         dividerDash = DashedLine(
                     start=BRectGroup[3].get_midpoint() + dGAP*UP,
                     end=BRectGroup[4].get_midpoint() + dGAP*DOWN,
@@ -344,17 +359,17 @@ class PenyelesaianKhawarizmiPertama(Scene):
                     color=COLX,
                     stroke_width=STROKE_WIDTH
                     )
-        self.play(Create(dividerDash))
-        self.play(Create(dividerLine))
+
+        self.play(LaggedStart(
+            FadeIn(labelgroup := VGroup(halfb_textL, halfb_textR)),
+            Create(dividerDash, run_time=1.5),
+            ))
+        self.play(Create(dividerLine), FadeOut(labelgroup))
         self.remove(dividerDash, dividerLine)
 
-    def reveal_halved_b_rects(self, KhawaSqrGroup: VGroup):
-        position = KhawaSqrGroup[1].get_center()
-        BRectLGroup = HalfBRect(VALX, VALB, move_to=position + LEFT*(1/4)*VALB.get_value())
-        BRectRGroup = HalfBRect(VALX, VALB, move_to=position + RIGHT*(1/4)*VALB.get_value())
-        KhawaSqrGroup.remove(rect:=KhawaSqrGroup[1])
+        KhawaSqrGroup.remove(BRectGroup)
         self.add(BRectRGroup, BRectLGroup)
-        self.remove(rect)
+        self.remove(BRectGroup)
         KhawaSqrGroup.add(BRectLGroup, BRectRGroup)
 
     def solve_geometry(self, KhawaSqrGroup: VGroup):
@@ -377,8 +392,27 @@ class PenyelesaianKhawarizmiPertama(Scene):
             return mobject
         half_b_sqr = HalfBSquare(VALB)
         half_b_sqr.next_to(KhawaSqrGroup[2], RIGHT, buff=0)
+
+        label_x_U = MathTex("x").scale(0.7)
+        label_x_U.set_color(COLX)
+
+        BUFFX: float = 0.3
+        label_x_U.next_to(KhawaSqrGroup[0], UP, buff=BUFFX)
+        label_x_L = label_x_U.copy().next_to(KhawaSqrGroup[0], LEFT, buff=BUFFX)
+
+        label_halfb_U = MathTex(r"\frac{1}{2}","b").scale(0.5)
+        label_halfb_U[1].set_color(COLB)
+        label_halfb_L = label_halfb_U.copy()
+
+        BUFF_HALFB: float = 0.15
+        label_halfb_U.next_to(KhawaSqrGroup[1], UP, buff=BUFF_HALFB)
+        label_halfb_L.next_to(KhawaSqrGroup[2], LEFT, buff=BUFF_HALFB+0.1)
+
+        self.play(FadeIn(labelGroup:= VGroup(label_x_U, label_halfb_U, label_x_L, label_halfb_L)))
+        self.play(Create(hglt:=highlight(KhawaSqrGroup)))
         KhawaSqrGroup.add(half_b_sqr)
-        self.play(Create(hglt:=highlight(KhawaSqrGroup)), Create(half_b_sqr))
+        KhawaSqrGroup.add(labelGroup)
+        self.play(Create(half_b_sqr))
         self.play(FadeOut(hglt))
         return half_b_sqr
 
@@ -391,7 +425,7 @@ class PenyelesaianKhawarizmiPertama(Scene):
                 stroke_width = stroke_proportion*STROKE_WIDTH
             ).move_to(Object.get_center())
             return mobject
-        self.play(KhawaSqrGroup.animate.shift(LEFT*2.3))
+        self.play(KhawaSqrGroup.animate.shift(LEFT*2.5))
 
         b_Down = KhawaSqrGroup[2]
         b_Right = KhawaSqrGroup[1]
@@ -403,7 +437,7 @@ class PenyelesaianKhawarizmiPertama(Scene):
         self.add(b_side_D, b_side_R)
         self.play(
             Transform(b_Down[1].copy(), equation_["x"]), 
-            Transform(b_side_D, equation_["b"]), 
+            Transform(b_side_D, VGroup(equation_["b"], equation_["half_b_free"])), 
             GrowFromCenter(equation_["sign_x_plus_b"])
         )
         self.play(
@@ -411,11 +445,12 @@ class PenyelesaianKhawarizmiPertama(Scene):
             Transform(b_side_R, equation_["sqr_x"][1]),
         )
 
-        self.play(Transform(KhawaSqrGroup[0:3].copy(), equation_["c"], replace_mobject_with_target_in_scene=True))
-        self.play(Transform(KhawaSqrGroup[3].copy(), equation_["halfb"], replace_mobject_with_target_in_scene=True))
-        self.play(GrowFromCenter(equation_["sign_c_plus_halfb"]))
+        self.play(
+            Transform(KhawaSqrGroup[0:3].copy(), equation_["c"], replace_mobject_with_target_in_scene=True),
+            Transform(KhawaSqrGroup[3].copy(), equation_["half_b_sqr"], replace_mobject_with_target_in_scene=True),
+            GrowFromCenter(equation_["sign_c_plus_halfb"]))
 
-        hglt = highlight(KhawaSqrGroup, gap=0, stroke_proportion=1)
+        hglt = highlight(KhawaSqrGroup[:3], gap=0, stroke_proportion=1)
         self.play(Create(hglt))
         self.play(Transform(hglt, highlight(equation[0])))
         self.play(Transform(hglt, highlight(equation[2:])))
@@ -435,8 +470,8 @@ class PenyelesaianKhawarizmiPertama(Scene):
 
         self.play(
             Transform(
-                VGroup(awal_["c"], awal_["sign_c_plus_halfb"], awal_["halfb"]), 
-                VGroup(akhir_["c"], akhir_["sign_c_plus_halfb"], akhir_["halfb"]), 
+                VGroup(awal_["c"], awal_["sign_c_plus_halfb"], awal_["half_b_sqr"]), 
+                VGroup(akhir_["c"], akhir_["sign_c_plus_halfb"], akhir_["half_b_sqr"]),
                 replace_mobject_with_target_in_scene=True),
             Transform(
                 awal_["sqr_x"],
@@ -446,8 +481,8 @@ class PenyelesaianKhawarizmiPertama(Scene):
             )
         self.play(
             Transform(
-                awal_["b"],
-                akhir_["b"],
+                VGroup(awal_["b"], awal_["half_b_free"]),
+                VGroup(akhir_["b"], akhir_["half_b_free"]),
                 replace_mobject_with_target_in_scene=True
                 ),
             FadeIn(akhir_["sign_b"], akhir_["sign_b_plus_c"]),
@@ -464,7 +499,7 @@ class PenyelesaianKhawarizmiPertama(Scene):
             )
         )
 
-        self.play(akhir.animate.shift(LEFT*1.5))
+        self.play(akhir.animate.shift(LEFT*2))
         return akhir
 
     def finalize_scene(self, pers_awal, pers_geometri, pers_jawapan, geometri):
