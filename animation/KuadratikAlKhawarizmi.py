@@ -181,7 +181,7 @@ class PersAwal(MathTex):
 class PersGeometri(MathTex):
     def __init__(self, eq_num: int, move_to: ndarray = ORIGIN):
         if eq_num == 1:
-            equation = [r"(x + \frac{1}{2}b)^2", "=", r"c + \frac{1}{2}b^2"]
+            equation = [r"(x + \frac{1}{2}b)^2", "=", r"c + \frac{1}{4}b^2"]
         elif eq_num == 2:
             equation = [""]
         elif eq_num == 3:
@@ -231,7 +231,7 @@ class PersGeometri(MathTex):
 class PersAkhir(MathTex):
     def __init__(self, eq_num: int, move_to: ndarray = ORIGIN):
         if eq_num == 1:
-            equation = [r"x", "=", r"-\frac{1}{2}b", "+", r"\sqrt{c + \frac{1}{2}b^2}"]
+            equation = [r"x", "=", r"-\frac{1}{2}b", "+", r"\sqrt{c + \frac{1}{4}b^2}"]
         elif eq_num == 2:
             equation = [""]
         elif eq_num == 3:
@@ -284,7 +284,6 @@ class PersAkhir(MathTex):
 # =================
 class PenyelesaianKhawarizmiPertama(Scene):
     def construct(self):
-        # TODO Add name at the bottom of the screen
         Title = self.add_title()
         pers_awal = self.fade_in_equation()
         KhawaSqrGroup = self.eq_to_geometry(pers_awal, XSquare(VALX, move_to=DOWN*2+LEFT*2.5), BXRect(VALX, VALB, move_to=DOWN*2))
@@ -300,7 +299,7 @@ class PenyelesaianKhawarizmiPertama(Scene):
     def add_title(self):
         title = TitleGroup("Kaedah Pertama")
         self.add(title)
-        twitter = Twitter.Twitter(remove_logo=True, twthandle="Thaza_Kun", scale=0.4)
+        twitter = Twitter.Twitter(remove_logo=True, twthandle="Thaza_Kun", scale=0.3)
         self.add(twitter)
         return title
 
