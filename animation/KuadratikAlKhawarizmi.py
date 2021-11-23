@@ -7,6 +7,7 @@ Manim   : v0.12.0
 from manim import *
 from numpy import ndarray
 from typing import Dict
+from assets import Twitter
 
 # Global Values
 # =============
@@ -299,6 +300,8 @@ class PenyelesaianKhawarizmiPertama(Scene):
     def add_title(self):
         title = TitleGroup("Kaedah Pertama")
         self.add(title)
+        twitter = Twitter.Twitter(remove_logo=True, twthandle="Thaza_Kun", scale=0.4)
+        self.add(twitter)
         return title
 
     def fade_in_equation(self):
