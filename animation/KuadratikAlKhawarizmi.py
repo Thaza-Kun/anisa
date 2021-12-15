@@ -282,10 +282,27 @@ class PersAkhir(MathTex):
 
 # Animation Classes
 # =================
-class PenyelesaianKhawarizmiPertama(Scene):
+class PenyelesaianKhawarizmi(Scene):
+    def pause(self, tick:float = 1):
+        self.wait(tick*0.5)
+
+    def add_title(self, title: str):
+        title = TitleGroup(title)
+        self.add(title)
+        twitter = Twitter.Twitter(remove_logo=True, twthandle="Thaza_Kun", scale=0.3)
+        self.add(twitter)
+        return title
+
+    def fade_in_equation(self, eq_num: int):
+        equation = PersAwal(eq_num=eq_num)
+        self.play(FadeIn(equation))
+        self.pause(3)
+        return equation
+
+class PenyelesaianKhawarizmiPertama(PenyelesaianKhawarizmi):
     def construct(self):
-        Title = self.add_title()
-        pers_awal = self.fade_in_equation()
+        Title = self.add_title("Kaedah Pertama")
+        pers_awal = self.fade_in_equation(1)
         KhawaSqrGroup = self.eq_to_geometry(pers_awal, XSquare(VALX, move_to=DOWN*2+LEFT*2.5), BXRect(VALX, VALB, move_to=DOWN*2))
         self.reposition_items(pers_awal, KhawaSqrGroup, Title)
         labelGroup = self.add_labels(KhawaSqrGroup)
@@ -296,22 +313,6 @@ class PenyelesaianKhawarizmiPertama(Scene):
         pers_jawapan = self.solve_final_eq(pers_geometri)
         self.finalize_scene(pers_awal, pers_geometri, pers_jawapan, geometri=KhawaSqrGroup)
         self.wait(3)
-
-    def pause(self, tick:float = 1):
-        self.wait(tick*0.5)
-
-    def add_title(self):
-        title = TitleGroup("Kaedah Pertama")
-        self.add(title)
-        twitter = Twitter.Twitter(remove_logo=True, twthandle="Thaza_Kun", scale=0.3)
-        self.add(twitter)
-        return title
-
-    def fade_in_equation(self):
-        equation = PersAwal(1)
-        self.play(FadeIn(equation))
-        self.pause(3)
-        return equation
 
     def eq_to_geometry(self, equation, x_sqr, BRectGroup):
         self.play(Transform(equation[0].copy(), x_sqr, replace_mobject_with_target_in_scene=True))
@@ -324,7 +325,6 @@ class PenyelesaianKhawarizmiPertama(Scene):
         BRectGroup[0].set_opacity(COLC_OPACITY)
         self.remove(c)
         KhawaSqrGroup = VGroup(x_sqr, BRectGroup)
-
         return KhawaSqrGroup
 
     def reposition_items(self, equation: MathTex, KhawaSqrGroup: VGroup, Title: VGroup):
