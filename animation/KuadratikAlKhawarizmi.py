@@ -27,7 +27,6 @@ dGAP = 0.037
 # Object Classes
 # ==============
 
-
 class XSquare(Square):
     def __init__(
         self, VALX: ValueTracker, move_to: ndarray = ORIGIN, update_size: bool = True
@@ -141,13 +140,11 @@ class CRect(Rectangle):
         update_size: bool = True,
         eq_num: int = 1,
     ):
-        if eq_num == 1:
-            self.xb_width = VALX.get_value() + VALB.get_value()
-        elif eq_num == 2:
-            self.xb_width = VALB.get_value() - VALX.get_value()
+        self.equation_number = eq_num
+        xb_width = self.set_xb_width(VALX, VALB)
         super().__init__(
             height=VALX.get_value(),
-            width=self.xb_width,
+            width=xb_width,
             color=COLC,
             fill_opacity=COLC_OPACITY,
             stroke_width=0,
@@ -158,8 +155,16 @@ class CRect(Rectangle):
 
     def update_size(self, VALX: ValueTracker, VALB: ValueTracker):
         self.add_updater(lambda rect: rect.stretch_to_fit_height(VALX.get_value()))
-        self.add_updater(lambda rect: rect.stretch_to_fit_width(self.xb_width))
+        self.add_updater(lambda rect: rect.stretch_to_fit_width(self.set_xb_width(VALX, VALB)))
         return self
+
+    def set_xb_width(self, VALX: ValueTracker, VALB: ValueTracker):
+        eq_num = self.equation_number
+        if eq_num == 1:
+            xb_width = VALX.get_value() + VALB.get_value()
+        elif eq_num == 2:
+            xb_width = VALB.get_value() - VALX.get_value()
+        return xb_width
 
 
 class HalfBSquare(Square):
@@ -751,8 +756,8 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
 
     def construct(self):
         self.eq_to_geometry()
-        # self.reposition_items()
-        # self.add_labels()
+        self.reposition_items()
+        self.add_labels()
         # self.divide_b_rect()
         # self.solve_geometry()
         # self.complete_the_square()
@@ -761,10 +766,11 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         # self.wait(3)
 
     def eq_to_geometry(self):
-        # TODO Apa kata kali ini kita mula dengan BX dulu?
         equation_ = self.persamaan_pertama.equation_
         c_rect = self.C_Rect
         x_sqr = self.X_Square
+        BX_RectGroup = self.BX_Rect
+        
         self.play(
             Transform(
                 equation_["sqr_x"].copy(),
@@ -783,35 +789,39 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
             x_sqr.animate.move_to(DOWN * 2 + LEFT * (1 / 2) * c_rect.width),
             c_rect.animate.move_to(DOWN * 2 + RIGHT * (1 / 2) * x_sqr.width),
         )
-        self.wait(3)
 
-        # self.play(
-        #     Transform(
-        #         equation_["b_of_bx"].copy(),
-        #         BRectGroup - BRectGroup[3:],
-        #         replace_mobject_with_target_in_scene=True,
-        #     ),
-        #     Transform(
-        #         equation_["x_of_bx"].copy(),
-        #         BRectGroup[3:],
-        #         replace_mobject_with_target_in_scene=True,
-        #     ),
-        # )
+        self.play(
+            Transform(
+                equation_["b_of_bx"].copy(),
+                BX_RectGroup - BX_RectGroup[3:],
+                replace_mobject_with_target_in_scene=True,
+            ),
+            Transform(
+                equation_["x_of_bx"].copy(),
+                BX_RectGroup[3:],
+                replace_mobject_with_target_in_scene=True,
+            ),
+        )
 
         # x_sqr.set_opacity(COLC_OPACITY)
         # BRectGroup[0].set_opacity(COLC_OPACITY)
         # self.remove(c)
-        # KhawaSqrGroup = VGroup(x_sqr, BRectGroup)
+        self.KhawaSqrGroup.add(x_sqr, c_rect, BX_RectGroup)
         # return KhawaSqrGroup
+        self.wait(3)
 
-    def reposition_items(self, equation: MathTex, KhawaSqrGroup: VGroup, Title: VGroup):
-        x_square, BRectGroup = KhawaSqrGroup
-        x_square.add_updater(lambda sqr: sqr.next_to(BRectGroup, LEFT, buff=0))
+    def reposition_items(self):
+        x_square, c_rect, BX_RectGroup = self.KhawaSqrGroup
+        equation: VGroup = self.persamaan_pertama
+        Title: VGroup = self.TitleGroup
+
+        x_square.add_updater(lambda sqr: sqr.next_to(c_rect, LEFT, buff=0))
         self.play(
             equation.animate.scale(0.5),
-            VALX.animate.set_value(2),
-            VALB.animate.set_value(2.5),
-            BRectGroup[0].animate.move_to(
+            self.VALX.animate.set_value(2.5),
+            self.VALB.animate.set_value(6),
+            BX_RectGroup[0].animate.move_to(
+                # TODO Betulkan kedudukan segi empat bx
                 DOWN * 2 + RIGHT * 2 * 0.625 + LEFT * 2 * 0.1435
             ),
         )
@@ -819,26 +829,28 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         x_square.remove_updater(follow_rect)
         self.play(
             equation.animate.next_to(Title, DOWN),
-            KhawaSqrGroup.animate.move_to(ORIGIN + 1.3 * DOWN),
+            self.KhawaSqrGroup.animate.move_to(ORIGIN + 1.3 * DOWN),
         )
+        self.wait(3)
 
-    def add_labels(self, KhawaSqrGroup: VGroup):
+    def add_labels(self):
         label_x_U = MathTex("x").scale(0.7)
         label_x_U.set_color(COLX)
 
         BUFFX: float = 0.3
-        label_x_U.next_to(KhawaSqrGroup[0], UP, buff=BUFFX)
-        label_x_L = label_x_U.copy().next_to(KhawaSqrGroup[0], LEFT, buff=BUFFX)
+        label_x_U.next_to(self.KhawaSqrGroup[0], UP, buff=BUFFX)
+        label_x_L = label_x_U.copy().next_to(self.KhawaSqrGroup[0], LEFT, buff=BUFFX)
 
         label_b = MathTex("b").scale(0.7)
         label_b.set_color(COLB)
 
         BUFF_B: float = 0.3
-        label_b.next_to(KhawaSqrGroup[1], UP, buff=BUFF_B)
+        label_b.next_to(self.KhawaSqrGroup[1], UP, buff=BUFF_B)
 
         self.play(FadeIn(labelGroup := VGroup(label_x_U, label_x_L, label_b)))
         self.pause(3)
-        return labelGroup
+        
+        self.labelGroup: VGroup = labelGroup
 
     def divide_b_rect(self, KhawaSqrGroup: VGroup, labelGroup: VGroup):
         BRectGroup = KhawaSqrGroup[1]
