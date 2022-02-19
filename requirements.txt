@@ -10,8 +10,8 @@ decorator==5.1.0
 glcontext==2.3.4
 idna==3.3
 isosurfaces==0.1.0
-manim==0.12.0
-ManimPango==0.3.1
+manim==0.14.0
+ManimPango==0.4.0.post2
 mapbox-earcut==0.12.11
 moderngl==5.6.4
 moderngl-window==2.4.0
@@ -30,6 +30,7 @@ scipy==1.7.2
 screeninfo==0.6.7
 six==1.16.0
 skia-pathops==0.7.1
+srt==3.5.1
 tqdm==4.62.3
 urllib3==1.26.7
 watchdog==2.1.6
