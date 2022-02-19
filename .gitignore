@@ -1,5 +1,6 @@
 # Ignore media to save space
 media
+anisa/
 
 # Ignore test file
 *_-_.py
