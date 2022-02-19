@@ -821,10 +821,9 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
             self.VALX.animate.set_value(2.5),
             self.VALB.animate.set_value(6),
             BX_RectGroup[0].animate.move_to(
-                # TODO Betulkan kedudukan segi empat bx
-                DOWN * 2 + RIGHT * 2 * 0.625 + LEFT * 2 * 0.1435
-            ),
+            DOWN * 2 + LEFT * ((12 * 0.1435) - (2 * 0.625))            ),
         )
+        # TODO Selesaikan masalah XSqr lari
         *others, follow_rect = x_square.get_updaters()
         x_square.remove_updater(follow_rect)
         self.play(
