@@ -816,35 +816,42 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         Title: VGroup = self.TitleGroup
 
         x_square.add_updater(lambda sqr: sqr.next_to(c_rect, LEFT, buff=0))
+        x_square.add_updater(lambda sqr: sqr.move_to(DOWN * 2 + LEFT * (1 / 2) * c_rect.width))
+        c_rect.add_updater(lambda rect: rect.move_to(DOWN * 2 + RIGHT * (1 / 2) * x_square.width)),
         self.play(
             equation.animate.scale(0.5),
             self.VALX.animate.set_value(2.5),
             self.VALB.animate.set_value(6),
-            BX_RectGroup[0].animate.move_to(
-            DOWN * 2 + LEFT * ((12 * 0.1435) - (2 * 0.625))            ),
+            BX_RectGroup[0].animate.move_to(VGroup(x_square, c_rect).get_center()
+            # DOWN * 2 + LEFT * ((12 * 0.1435) - (2 * 0.625))
+            ),
         )
         # TODO Selesaikan masalah XSqr lari
-        *others, follow_rect = x_square.get_updaters()
-        x_square.remove_updater(follow_rect)
+        *others, center_group_while_growing = x_square.get_updaters()
+        x_square.remove_updater(center_group_while_growing)
+        *others, center_group_while_growing = c_rect.get_updaters()
+        c_rect.remove_updater(center_group_while_growing)
+        
         self.play(
             equation.animate.next_to(Title, DOWN),
             self.KhawaSqrGroup.animate.move_to(ORIGIN + 1.3 * DOWN),
         )
-        self.wait(3)
+        self.wait(1)
 
     def add_labels(self):
+        x_square, c_rect, BX_RectGroup = self.KhawaSqrGroup
         label_x_U = MathTex("x").scale(0.7)
         label_x_U.set_color(COLX)
 
-        BUFFX: float = 0.3
-        label_x_U.next_to(self.KhawaSqrGroup[0], UP, buff=BUFFX)
-        label_x_L = label_x_U.copy().next_to(self.KhawaSqrGroup[0], LEFT, buff=BUFFX)
+        BUFFX: float = -0.4
+        label_x_U.next_to(x_square, UP, buff=BUFFX)
+        label_x_L = label_x_U.copy().next_to(x_square, LEFT, buff=BUFFX)
 
         label_b = MathTex("b").scale(0.7)
         label_b.set_color(COLB)
 
         BUFF_B: float = 0.3
-        label_b.next_to(self.KhawaSqrGroup[1], UP, buff=BUFF_B)
+        label_b.next_to(BX_RectGroup, UP, buff=BUFF_B)
 
         self.play(FadeIn(labelGroup := VGroup(label_x_U, label_x_L, label_b)))
         self.pause(3)
