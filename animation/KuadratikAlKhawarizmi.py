@@ -124,10 +124,10 @@ class HalfBRect(BXRect):
         VALX: ValueTracker,
         VALB: ValueTracker,
         move_to: ndarray = ORIGIN,
-        width_ratio: float = 0.5,
+        width_proportion: float = 0.5,
     ):
         super().__init__(
-            VALX, VALB, move_to=move_to, width_proportion=width_ratio, show_color=True
+            VALX, VALB, move_to=move_to, width_proportion=width_proportion, show_color=True
         )
 
 
@@ -758,7 +758,7 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         self.eq_to_geometry()
         self.reposition_items()
         self.add_labels()
-        # self.divide_b_rect()
+        self.divide_b_rect()
         # self.solve_geometry()
         # self.complete_the_square()
         # self.geometry_to_eq()
@@ -826,7 +826,6 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
             # DOWN * 2 + LEFT * ((12 * 0.1435) - (2 * 0.625))
             ),
         )
-        # TODO Selesaikan masalah XSqr lari
         *others, center_group_while_growing = x_square.get_updaters()
         x_square.remove_updater(center_group_while_growing)
         *others, center_group_while_growing = c_rect.get_updaters()
@@ -836,7 +835,6 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
             equation.animate.next_to(Title, DOWN),
             self.KhawaSqrGroup.animate.move_to(ORIGIN + 1.3 * DOWN),
         )
-        self.wait(1)
 
     def add_labels(self):
         x_square, c_rect, BX_RectGroup = self.KhawaSqrGroup
@@ -853,21 +851,29 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         BUFF_B: float = 0.3
         label_b.next_to(BX_RectGroup, UP, buff=BUFF_B)
 
-        self.play(FadeIn(labelGroup := VGroup(label_x_U, label_x_L, label_b)))
+        self.labelGroup: VGroup = VGroup(label_x_U, label_x_L, label_b)
+        self.play(FadeIn(self.labelGroup))
         self.pause(3)
         
-        self.labelGroup: VGroup = labelGroup
-
-    def divide_b_rect(self, KhawaSqrGroup: VGroup, labelGroup: VGroup):
-        BRectGroup = KhawaSqrGroup[1]
-        labelb = labelGroup[2]
+    def divide_b_rect(self):
+        x_square, c_rect, BRectGroup = self.KhawaSqrGroup
+        labelb = self.labelGroup[2]
 
         position = BRectGroup.get_center()
-        BRectLGroup = HalfBRect(
-            VALX, VALB, move_to=position + LEFT * (1 / 4) * VALB.get_value()
+        half_b_minus_x = 0.5*self.VALB.get_value() - self.VALX.get_value()
+
+        BRectLGroup = BXRect(
+            self.VALX, self.VALB,
+            width_proportion=self.VALX.get_value() / self.VALB.get_value(),
+            move_to=position + LEFT * ((1 / 2) * self.VALX.get_value() + half_b_minus_x)
+        )
+        BRectMidGroup = BXRect(
+            self.VALX, self.VALB, 
+            width_proportion=half_b_minus_x  / self.VALB.get_value(), 
+            move_to=position + LEFT * 0.5 * half_b_minus_x
         )
         BRectRGroup = HalfBRect(
-            VALX, VALB, move_to=position + RIGHT * (1 / 4) * VALB.get_value()
+            self.VALX, self.VALB, move_to=position + RIGHT * (1 / 4) * self.VALB.get_value()
         )
 
         label_halfb_U = MathTex(r"\frac{1}{2}", "b").scale(0.7)
@@ -902,23 +908,30 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
                 ),
             )
         )
-        labelGroup.remove(labelb)
-        labelGroup.add(label_halfb_U, label_halfb_L)
+        self.labelGroup.remove(labelb)
+        self.labelGroup.add(label_halfb_U, label_halfb_L)
         self.play(Create(dividerLine))
         self.remove(dividerDash, dividerLine)
 
-        self.add(BRectRGroup, BRectLGroup)
-        KhawaSqrGroup.add(BRectLGroup, BRectRGroup)
+        self.add(
+            BRectRGroup,
+            BRectLGroup,
+            BRectMidGroup
+            )
+        self.KhawaSqrGroup.add(BRectLGroup, BRectRGroup, BRectMidGroup)
 
         self.remove(BRectGroup)
-        KhawaSqrGroup.remove(BRectGroup)
+        self.KhawaSqrGroup.remove(BRectGroup)
+        # TODO Betulkan label dan warnakan mid
 
-    def solve_geometry(self, KhawaSqrGroup: VGroup, labelGroup: VGroup):
-        main_label = labelGroup[:-1]
-        free_label = labelGroup[-1]
+        self.wait(3)
 
-        main_geometry = KhawaSqrGroup[:-1]
-        free_geometry = KhawaSqrGroup[-1]
+    def solve_geometry(self):
+        main_label = self.labelGroup[:-1]
+        free_label = self.labelGroup[-1]
+
+        main_geometry = self.KhawaSqrGroup[:-1]
+        free_geometry = self.KhawaSqrGroup[-1]
 
         self.play(
             VGroup(free_geometry, free_label).animate.shift(DOWN),
@@ -938,7 +951,7 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         free_label.clear_updaters()
 
         self.play(
-            VGroup(KhawaSqrGroup, labelGroup).animate.move_to(
+            VGroup(self.KhawaSqrGroup, self.labelGroup).animate.move_to(
                 ORIGIN + DOWN + 0.5 * UP + 0.25 * LEFT
             )
         )
