@@ -18,6 +18,8 @@ COLC = GREEN
 COLSQR = RED
 COLHALFB = ORANGE
 
+COLAUX = PINK
+
 COLC_OPACITY = 0.6
 
 STROKE_WIDTH = DEFAULT_STROKE_WIDTH * 2
@@ -26,6 +28,7 @@ dGAP = 0.037
 
 # Object Classes
 # ==============
+
 
 class XSquare(Square):
     def __init__(
@@ -61,6 +64,9 @@ class BXRect(VGroup):
         width_proportion: float = 1,
         update_size: bool = True,
         show_color: bool = False,
+        fill_color=COLC,
+        hori_color=COLB,
+        vert_color=COLX,
     ):
         self.width_proportion = width_proportion
         if show_color:
@@ -70,37 +76,44 @@ class BXRect(VGroup):
         self.main_rect = Rectangle(
             height=VALX.get_value(),
             width=self.width_proportion * VALB.get_value(),
-            color=COLC,
+            color=fill_color,
             stroke_width=STROKE_WIDTH,
             stroke_color=COLB,
             fill_opacity=opacity,
         )
         super().__init__(self.main_rect)
-        self.add(*[self.color_vert_side(side) for side in (LEFT, RIGHT)])
-        self.add(*[self.color_hori_side(side) for side in (UP, DOWN)])
+        self.add(
+            *[
+                self.color_vert_side(side, fill_color=vert_color)
+                for side in (LEFT, RIGHT)
+            ]
+        )
+        self.add(
+            *[self.color_hori_side(side, fill_color=hori_color) for side in (UP, DOWN)]
+        )
         self.move_to(move_to)
         if update_size:
             self.update_size(VALX, VALB)
 
-    def color_vert_side(self, side: ndarray):
+    def color_vert_side(self, side: ndarray, fill_color=COLX):
         GAP = [0, dGAP, 0]
         vert = always_redraw(
             lambda: Line(
                 start=self.main_rect.get_corner(side + UP) + GAP,
                 end=self.main_rect.get_corner(side + DOWN) - GAP,
-                color=COLX,
+                color=fill_color,
                 stroke_width=STROKE_WIDTH,
             )
         )
         return vert
 
-    def color_hori_side(self, side: ndarray):
+    def color_hori_side(self, side: ndarray, fill_color=COLB):
         GAP = [dGAP, 0, 0]
         hori = always_redraw(
             lambda: Line(
                 start=self.main_rect.get_corner(LEFT + side) - GAP,
                 end=self.main_rect.get_corner(RIGHT + side) + GAP,
-                color=COLB,
+                color=fill_color,
                 stroke_width=STROKE_WIDTH,
             )
         )
@@ -127,7 +140,11 @@ class HalfBRect(BXRect):
         width_proportion: float = 0.5,
     ):
         super().__init__(
-            VALX, VALB, move_to=move_to, width_proportion=width_proportion, show_color=True
+            VALX,
+            VALB,
+            move_to=move_to,
+            width_proportion=width_proportion,
+            show_color=True,
         )
 
 
@@ -155,7 +172,9 @@ class CRect(Rectangle):
 
     def update_size(self, VALX: ValueTracker, VALB: ValueTracker):
         self.add_updater(lambda rect: rect.stretch_to_fit_height(VALX.get_value()))
-        self.add_updater(lambda rect: rect.stretch_to_fit_width(self.set_xb_width(VALX, VALB)))
+        self.add_updater(
+            lambda rect: rect.stretch_to_fit_width(self.set_xb_width(VALX, VALB))
+        )
         return self
 
     def set_xb_width(self, VALX: ValueTracker, VALB: ValueTracker):
@@ -770,7 +789,7 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         c_rect = self.C_Rect
         x_sqr = self.X_Square
         BX_RectGroup = self.BX_Rect
-        
+
         self.play(
             Transform(
                 equation_["sqr_x"].copy(),
@@ -816,21 +835,26 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         Title: VGroup = self.TitleGroup
 
         x_square.add_updater(lambda sqr: sqr.next_to(c_rect, LEFT, buff=0))
-        x_square.add_updater(lambda sqr: sqr.move_to(DOWN * 2 + LEFT * (1 / 2) * c_rect.width))
-        c_rect.add_updater(lambda rect: rect.move_to(DOWN * 2 + RIGHT * (1 / 2) * x_square.width)),
+        x_square.add_updater(
+            lambda sqr: sqr.move_to(DOWN * 2 + LEFT * (1 / 2) * c_rect.width)
+        )
+        c_rect.add_updater(
+            lambda rect: rect.move_to(DOWN * 2 + RIGHT * (1 / 2) * x_square.width)
+        ),
         self.play(
             equation.animate.scale(0.5),
             self.VALX.animate.set_value(2.5),
             self.VALB.animate.set_value(6),
-            BX_RectGroup[0].animate.move_to(VGroup(x_square, c_rect).get_center()
-            # DOWN * 2 + LEFT * ((12 * 0.1435) - (2 * 0.625))
+            BX_RectGroup[0].animate.move_to(
+                VGroup(x_square, c_rect).get_center()
+                # DOWN * 2 + LEFT * ((12 * 0.1435) - (2 * 0.625))
             ),
         )
         *others, center_group_while_growing = x_square.get_updaters()
         x_square.remove_updater(center_group_while_growing)
         *others, center_group_while_growing = c_rect.get_updaters()
         c_rect.remove_updater(center_group_while_growing)
-        
+
         self.play(
             equation.animate.next_to(Title, DOWN),
             self.KhawaSqrGroup.animate.move_to(ORIGIN + 1.3 * DOWN),
@@ -854,26 +878,36 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         self.labelGroup: VGroup = VGroup(label_x_U, label_x_L, label_b)
         self.play(FadeIn(self.labelGroup))
         self.pause(3)
-        
+
     def divide_b_rect(self):
         x_square, c_rect, BRectGroup = self.KhawaSqrGroup
         labelb = self.labelGroup[2]
+        labelx_U = self.labelGroup[0]
 
         position = BRectGroup.get_center()
-        half_b_minus_x = 0.5*self.VALB.get_value() - self.VALX.get_value()
+        half_b_minus_x = 0.5 * self.VALB.get_value() - self.VALX.get_value()
 
         BRectLGroup = BXRect(
-            self.VALX, self.VALB,
+            self.VALX,
+            self.VALB,
             width_proportion=self.VALX.get_value() / self.VALB.get_value(),
-            move_to=position + LEFT * ((1 / 2) * self.VALX.get_value() + half_b_minus_x)
+            move_to=position
+            + LEFT * ((1 / 2) * self.VALX.get_value() + half_b_minus_x),
         )
         BRectMidGroup = BXRect(
-            self.VALX, self.VALB, 
-            width_proportion=half_b_minus_x  / self.VALB.get_value(), 
-            move_to=position + LEFT * 0.5 * half_b_minus_x
+            self.VALX,
+            self.VALB,
+            width_proportion=half_b_minus_x / self.VALB.get_value(),
+            move_to=position + LEFT * 0.5 * half_b_minus_x,
+            show_color=True,
+            fill_color=COLC,
+            hori_color=COLAUX,
+            vert_color=COLX,
         )
         BRectRGroup = HalfBRect(
-            self.VALX, self.VALB, move_to=position + RIGHT * (1 / 4) * self.VALB.get_value()
+            self.VALX,
+            self.VALB,
+            move_to=position + RIGHT * (1 / 4) * self.VALB.get_value(),
         )
 
         label_halfb_U = MathTex(r"\frac{1}{2}", "b").scale(0.7)
@@ -883,6 +917,11 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         BUFF_HALFB: float = 0.1
         label_halfb_U.next_to(BRectLGroup, UP, buff=BUFF_HALFB)
         label_halfb_L.next_to(BRectRGroup, UP, buff=BUFF_HALFB)
+
+        label_halfb_minus_x = MathTex(r"\frac{1}{2}", "b", "-", "x").scale(0.7)
+        label_halfb_minus_x[1].set_color(COLB)
+        label_halfb_minus_x[3].set_color(COLX)
+        label_halfb_minus_x.next_to(BRectMidGroup, UP, buff=BUFF_HALFB)
 
         dividerDash = DashedLine(
             start=BRectGroup[3].get_midpoint() + dGAP * UP,
@@ -911,18 +950,28 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         self.labelGroup.remove(labelb)
         self.labelGroup.add(label_halfb_U, label_halfb_L)
         self.play(Create(dividerLine))
-        self.remove(dividerDash, dividerLine)
+        self.remove(dividerDash)
 
+        self.play(
+            Transform(label_halfb_U.copy(), label_halfb_minus_x[:1]),
+            Transform(labelx_U, label_halfb_minus_x[3]),
+            FadeIn(label_halfb_minus_x),
+        )
+        self.remove(dividerLine)
         self.add(
-            BRectRGroup,
             BRectLGroup,
-            BRectMidGroup
-            )
-        self.KhawaSqrGroup.add(BRectLGroup, BRectRGroup, BRectMidGroup)
+            # BRectMidGroup,
+            BRectRGroup,
+        )
+        self.play(Create(BRectMidGroup))
+        self.KhawaSqrGroup.remove(*self.KhawaSqrGroup[:-1])
+        # TODO Make middle sqr animation more intuitive
 
-        self.remove(BRectGroup)
-        self.KhawaSqrGroup.remove(BRectGroup)
-        # TODO Betulkan label dan warnakan mid
+        self.KhawaSqrGroup.add(
+            BRectLGroup,
+            BRectRGroup,
+            BRectMidGroup,
+        )
 
         self.wait(3)
 
