@@ -11,14 +11,14 @@ from assets import Twitter
 
 # Global Values
 # =============
-COLX = BLUE
-COLB = YELLOW
-COLC = GREEN
+COL_X = BLUE
+COL_B = YELLOW
+COL_C = GREEN
 
-COLSQR = RED
-COLHALFB = ORANGE
+COL_SQR = RED
+COL_HALFB_SQR = ORANGE
 
-COLAUX = PINK
+COL_HALFB_MINUS_C = RED_E
 
 COLC_OPACITY = 0.6
 
@@ -36,9 +36,9 @@ class XSquare(Square):
     ):
         super().__init__(
             side_length=VALX.get_value(),
-            color=COLC,
+            color=COL_C,
             stroke_width=STROKE_WIDTH,
-            stroke_color=COLX,
+            stroke_color=COL_X,
             fill_opacity=0,
         )
         self.move_to(move_to)
@@ -64,9 +64,10 @@ class BXRect(VGroup):
         width_proportion: float = 1,
         update_size: bool = True,
         show_color: bool = False,
-        fill_color=COLC,
-        hori_color=COLB,
-        vert_color=COLX,
+        fill_color=COL_C,
+        stroke_color=COL_B,
+        hori_color=COL_B,
+        vert_color=COL_X,
     ):
         self.width_proportion = width_proportion
         if show_color:
@@ -78,7 +79,7 @@ class BXRect(VGroup):
             width=self.width_proportion * VALB.get_value(),
             color=fill_color,
             stroke_width=STROKE_WIDTH,
-            stroke_color=COLB,
+            stroke_color=stroke_color,
             fill_opacity=opacity,
         )
         super().__init__(self.main_rect)
@@ -95,7 +96,7 @@ class BXRect(VGroup):
         if update_size:
             self.update_size(VALX, VALB)
 
-    def color_vert_side(self, side: ndarray, fill_color=COLX):
+    def color_vert_side(self, side: ndarray, fill_color=COL_X):
         GAP = [0, dGAP, 0]
         vert = always_redraw(
             lambda: Line(
@@ -107,7 +108,7 @@ class BXRect(VGroup):
         )
         return vert
 
-    def color_hori_side(self, side: ndarray, fill_color=COLB):
+    def color_hori_side(self, side: ndarray, fill_color=COL_B):
         GAP = [dGAP, 0, 0]
         hori = always_redraw(
             lambda: Line(
@@ -162,7 +163,7 @@ class CRect(Rectangle):
         super().__init__(
             height=VALX.get_value(),
             width=xb_width,
-            color=COLC,
+            color=COL_C,
             fill_opacity=COLC_OPACITY,
             stroke_width=0,
         )
@@ -192,9 +193,9 @@ class HalfBSquare(Square):
     ):
         super().__init__(
             side_length=0.5 * VALB.get_value(),
-            color=COLHALFB,
+            color=COL_HALFB_SQR,
             stroke_width=STROKE_WIDTH,
-            stroke_color=COLB,
+            stroke_color=COL_B,
             fill_opacity=1,
         )
         self.move_to(move_to)
@@ -259,10 +260,10 @@ class PersAwal(MathTex):
                 "bx": self[4],
             }
         self.equation_ = equation_
-        self.equation_["sqr_x"].set_color(COLX)
-        self.equation_["x_of_bx"].set_color(COLX)
-        self.equation_["b_of_bx"].set_color(COLB)
-        self.equation_["c"].set_color(COLC)
+        self.equation_["sqr_x"].set_color(COL_X)
+        self.equation_["x_of_bx"].set_color(COL_X)
+        self.equation_["b_of_bx"].set_color(COL_B)
+        self.equation_["c"].set_color(COL_C)
 
 
 class PersGeometri(MathTex):
@@ -295,10 +296,10 @@ class PersGeometri(MathTex):
             equation_ = [""]
         else:
             equation_ = [""]
-        equation_["x"].set_color(COLX)
-        equation_["b"].set_color(COLB)
-        equation_["c"].set_color(COLC)
-        equation_["half_b_sqr"].set_color(COLHALFB)
+        equation_["x"].set_color(COL_X)
+        equation_["b"].set_color(COL_B)
+        equation_["c"].set_color(COL_C)
+        equation_["half_b_sqr"].set_color(COL_HALFB_SQR)
         self.equation_ = equation_
         self.move_to(move_to)
 
@@ -347,10 +348,10 @@ class PersAkhir(MathTex):
             equation = [""]
         else:
             equation = [""]
-        equation_["x"].set_color(COLX)
-        equation_["b"].set_color(COLB)
-        equation_["c"].set_color(COLC)
-        equation_["half_b_sqr"].set_color(COLHALFB)
+        equation_["x"].set_color(COL_X)
+        equation_["b"].set_color(COL_B)
+        equation_["c"].set_color(COL_C)
+        equation_["half_b_sqr"].set_color(COL_HALFB_SQR)
         self.equation_ = equation_
         self.move_to(move_to)
 
@@ -504,14 +505,14 @@ class PenyelesaianKhawarizmiPertama(PenyelesaianKhawarizmi):
 
     def add_labels(self):
         label_x_U = MathTex("x").scale(0.7)
-        label_x_U.set_color(COLX)
+        label_x_U.set_color(COL_X)
 
         BUFFX: float = 0.3
         label_x_U.next_to(self.KhawaSqrGroup[0], UP, buff=BUFFX)
         label_x_L = label_x_U.copy().next_to(self.KhawaSqrGroup[0], LEFT, buff=BUFFX)
 
         label_b = MathTex("b").scale(0.7)
-        label_b.set_color(COLB)
+        label_b.set_color(COL_B)
 
         BUFF_B: float = 0.3
         label_b.next_to(self.KhawaSqrGroup[1], UP, buff=BUFF_B)
@@ -538,7 +539,7 @@ class PenyelesaianKhawarizmiPertama(PenyelesaianKhawarizmi):
         )
 
         label_halfb_U = MathTex(r"\frac{1}{2}", "b").scale(0.7)
-        label_halfb_U[1].set_color(COLB)
+        label_halfb_U[1].set_color(COL_B)
         label_halfb_L = label_halfb_U.copy()
 
         BUFF_HALFB: float = 0.1
@@ -548,14 +549,14 @@ class PenyelesaianKhawarizmiPertama(PenyelesaianKhawarizmi):
         dividerDash = DashedLine(
             start=BRectGroup[3].get_midpoint() + dGAP * UP,
             end=BRectGroup[4].get_midpoint() + dGAP * DOWN,
-            color=COLX,
+            color=COL_X,
             stroke_width=STROKE_WIDTH,
             dash_length=DEFAULT_DASH_LENGTH * 2.5,
         )
         dividerLine = Line(
             start=BRectGroup[3].get_midpoint() + dGAP * UP,
             end=BRectGroup[4].get_midpoint() + dGAP * DOWN,
-            color=COLX,
+            color=COL_X,
             stroke_width=STROKE_WIDTH,
         )
 
@@ -615,7 +616,7 @@ class PenyelesaianKhawarizmiPertama(PenyelesaianKhawarizmi):
 
     def complete_the_square(self):
         def highlight(
-            Object: Mobject, color=COLSQR, gap: float = 0, stroke_proportion: int = 1
+            Object: Mobject, color=COL_SQR, gap: float = 0, stroke_proportion: int = 1
         ) -> Mobject:
             mobject = Rectangle(
                 height=Object.height + gap,
@@ -636,7 +637,7 @@ class PenyelesaianKhawarizmiPertama(PenyelesaianKhawarizmi):
         halfb_sqr_expression = MathTex(r"\frac{1}{4}", "b", r"^2")
         halfb_sqr_expression.move_to(halfb_sqr_pos)
         halfb_sqr_expression.scale(0.7)
-        halfb_sqr_expression[1].set_color(COLB)
+        halfb_sqr_expression[1].set_color(COL_B)
 
         self.pause(3)
         self.play(Create(hglt := highlight(self.KhawaSqrGroup)))
@@ -660,7 +661,7 @@ class PenyelesaianKhawarizmiPertama(PenyelesaianKhawarizmi):
 
         def highlight(
             Object: Mobject,
-            color=COLSQR,
+            color=COL_SQR,
             gap: float = 0.2,
             stroke_proportion: int = 0.5,
         ) -> Mobject:
@@ -863,14 +864,14 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
     def add_labels(self):
         x_square, c_rect, BX_RectGroup = self.KhawaSqrGroup
         label_x_U = MathTex("x").scale(0.7)
-        label_x_U.set_color(COLX)
+        label_x_U.set_color(COL_X)
 
         BUFFX: float = -0.4
         label_x_U.next_to(x_square, UP, buff=BUFFX)
         label_x_L = label_x_U.copy().next_to(x_square, LEFT, buff=BUFFX)
 
         label_b = MathTex("b").scale(0.7)
-        label_b.set_color(COLB)
+        label_b.set_color(COL_B)
 
         BUFF_B: float = 0.3
         label_b.next_to(BX_RectGroup, UP, buff=BUFF_B)
@@ -900,9 +901,10 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
             width_proportion=half_b_minus_x / self.VALB.get_value(),
             move_to=position + LEFT * 0.5 * half_b_minus_x,
             show_color=True,
-            fill_color=COLC,
-            hori_color=COLAUX,
-            vert_color=COLX,
+            fill_color=COL_C,
+            stroke_color=COL_X,
+            hori_color=COL_HALFB_MINUS_C,
+            vert_color=COL_X,
         )
         BRectRGroup = HalfBRect(
             self.VALX,
@@ -910,30 +912,30 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
             move_to=position + RIGHT * (1 / 4) * self.VALB.get_value(),
         )
 
-        label_halfb_U = MathTex(r"\frac{1}{2}", "b").scale(0.7)
-        label_halfb_U[1].set_color(COLB)
-        label_halfb_L = label_halfb_U.copy()
+        label_halfb_L = MathTex(r"\frac{1}{2}", "b").scale(0.7)
+        label_halfb_L[1].set_color(COL_B)
+        label_halfb_R = label_halfb_L.copy()
 
         BUFF_HALFB: float = 0.1
-        label_halfb_U.next_to(BRectLGroup, UP, buff=BUFF_HALFB)
-        label_halfb_L.next_to(BRectRGroup, UP, buff=BUFF_HALFB)
+        label_halfb_L.next_to(VGroup(BRectLGroup, BRectMidGroup), UP, buff=BUFF_HALFB)
+        label_halfb_R.next_to(BRectRGroup, UP, buff=BUFF_HALFB)
 
         label_halfb_minus_x = MathTex(r"\frac{1}{2}", "b", "-", "x").scale(0.7)
-        label_halfb_minus_x[1].set_color(COLB)
-        label_halfb_minus_x[3].set_color(COLX)
+        label_halfb_minus_x[1].set_color(COL_B)
+        label_halfb_minus_x[3].set_color(COL_X)
         label_halfb_minus_x.next_to(BRectMidGroup, UP, buff=BUFF_HALFB)
 
         dividerDash = DashedLine(
             start=BRectGroup[3].get_midpoint() + dGAP * UP,
             end=BRectGroup[4].get_midpoint() + dGAP * DOWN,
-            color=COLX,
+            color=COL_X,
             stroke_width=STROKE_WIDTH,
             dash_length=DEFAULT_DASH_LENGTH * 2.5,
         )
         dividerLine = Line(
             start=BRectGroup[3].get_midpoint() + dGAP * UP,
             end=BRectGroup[4].get_midpoint() + dGAP * DOWN,
-            color=COLX,
+            color=COL_X,
             stroke_width=STROKE_WIDTH,
         )
 
@@ -942,36 +944,65 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
                 Create(dividerDash, run_time=1.5),
                 Transform(
                     labelb,
-                    VGroup(label_halfb_U, label_halfb_L),
+                    VGroup(label_halfb_L, label_halfb_R),
                     replace_mobject_with_target_in_scene=True,
                 ),
             )
         )
         self.labelGroup.remove(labelb)
-        self.labelGroup.add(label_halfb_U, label_halfb_L)
+        self.labelGroup.add(label_halfb_L, label_halfb_R)
         self.play(Create(dividerLine))
         self.remove(dividerDash)
-
-        self.play(
-            Transform(label_halfb_U.copy(), label_halfb_minus_x[:1]),
-            Transform(labelx_U, label_halfb_minus_x[3]),
-            FadeIn(label_halfb_minus_x),
-        )
         self.remove(dividerLine)
+
         self.add(
             BRectLGroup,
             # BRectMidGroup,
             BRectRGroup,
+            dividerLine,
         )
-        self.play(Create(BRectMidGroup))
+        temp_halfb_L_line = Line(
+            start=BRectLGroup.get_corner(UP + LEFT) + dGAP * DOWN,
+            end=BRectMidGroup.get_corner(UP + RIGHT) + dGAP * DOWN,
+            color=COL_B,
+            stroke_width=STROKE_WIDTH,
+        )
+        temp_x_U_line = Line(
+            start=BRectLGroup.get_corner(UP + LEFT),
+            end=BRectLGroup.get_corner(UP + RIGHT),
+            color=COL_X,
+            stroke_width=STROKE_WIDTH,
+        )
         self.KhawaSqrGroup.remove(*self.KhawaSqrGroup[:-1])
-        # TODO Make middle sqr animation more intuitive
+        self.add(temp_x_U_line, temp_halfb_L_line)
 
-        self.KhawaSqrGroup.add(
-            BRectLGroup,
-            BRectRGroup,
-            BRectMidGroup,
+        TopHalfBGroup = VGroup(label_halfb_L, temp_halfb_L_line)
+        TopXGroup = VGroup(labelx_U, temp_x_U_line)
+
+        self.play(TopXGroup.animate.shift(0.75 * UP), TopHalfBGroup.animate.shift(UP))
+        temp_halfb_minus_c_line = Line(
+            start=temp_x_U_line.get_end()
+            + (0.5 * self.VALB.get_value() - self.VALX.get_value()) * RIGHT,
+            end=temp_x_U_line.get_end() + dGAP * LEFT,
+            color=COL_HALFB_MINUS_C,
+            stroke_width=STROKE_WIDTH,
         )
+        self.play(Create(temp_halfb_minus_c_line))
+
+        # self.play(Create(BRectMidGroup)) #!
+        # TODO Sambung mid sqr animation
+
+        self.play(
+            Transform(label_halfb_L, label_halfb_minus_x[:1]),
+            Transform(labelx_U, label_halfb_minus_x[3]),
+            FadeIn(label_halfb_minus_x),
+        )
+        self.play(temp_halfb_minus_c_line.animate.shift((0.75 + dGAP) * DOWN))
+        # self.KhawaSqrGroup.add(
+        #     BRectLGroup,
+        #     BRectRGroup,
+        #     BRectMidGroup,
+        # )
 
         self.wait(3)
 
@@ -1007,7 +1038,7 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
 
     def complete_the_square(self, KhawaSqrGroup: VGroup, labelGroup: VGroup):
         def highlight(
-            Object: Mobject, color=COLSQR, gap: float = 0, stroke_proportion: int = 1
+            Object: Mobject, color=COL_SQR, gap: float = 0, stroke_proportion: int = 1
         ) -> Mobject:
             mobject = Rectangle(
                 height=Object.height + gap,
@@ -1028,7 +1059,7 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         halfb_sqr_expression = MathTex(r"\frac{1}{4}", "b", r"^2")
         halfb_sqr_expression.move_to(halfb_sqr_pos)
         halfb_sqr_expression.scale(0.7)
-        halfb_sqr_expression[1].set_color(COLB)
+        halfb_sqr_expression[1].set_color(COL_B)
 
         self.pause(3)
         self.play(Create(hglt := highlight(KhawaSqrGroup)))
@@ -1052,7 +1083,7 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
     ):
         def highlight(
             Object: Mobject,
-            color=COLSQR,
+            color=COL_SQR,
             gap: float = 0.2,
             stroke_proportion: int = 0.5,
         ) -> Mobject:
