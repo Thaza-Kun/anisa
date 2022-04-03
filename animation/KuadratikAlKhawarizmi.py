@@ -779,7 +779,7 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         self.reposition_items()
         self.add_labels()
         self.divide_b_rect()
-        # self.solve_geometry()
+        self.solve_geometry()
         # self.complete_the_square()
         # self.geometry_to_eq()
         # self.solve_final_eq()
@@ -822,12 +822,7 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
                 replace_mobject_with_target_in_scene=True,
             ),
         )
-
-        # x_sqr.set_opacity(COLC_OPACITY)
-        # BRectGroup[0].set_opacity(COLC_OPACITY)
-        # self.remove(c)
         self.KhawaSqrGroup.add(x_sqr, c_rect, BX_RectGroup)
-        # return KhawaSqrGroup
         self.wait(3)
 
     def reposition_items(self):
@@ -953,14 +948,7 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
         self.labelGroup.add(label_halfb_L, label_halfb_R)
         self.play(Create(dividerLine))
         self.remove(dividerDash)
-        self.remove(dividerLine)
 
-        self.add(
-            BRectLGroup,
-            # BRectMidGroup,
-            BRectRGroup,
-            dividerLine,
-        )
         temp_halfb_L_line = Line(
             start=BRectLGroup.get_corner(UP + LEFT) + dGAP * DOWN,
             end=BRectMidGroup.get_corner(UP + RIGHT) + dGAP * DOWN,
@@ -973,40 +961,53 @@ class PenyelesaianKhawarizmiKedua(PenyelesaianKhawarizmi):
             color=COL_X,
             stroke_width=STROKE_WIDTH,
         )
-        self.KhawaSqrGroup.remove(*self.KhawaSqrGroup[:-1])
         self.add(temp_x_U_line, temp_halfb_L_line)
 
         TopHalfBGroup = VGroup(label_halfb_L, temp_halfb_L_line)
         TopXGroup = VGroup(labelx_U, temp_x_U_line)
 
-        self.play(TopXGroup.animate.shift(0.75 * UP), TopHalfBGroup.animate.shift(UP))
+        shift_x_by: float = 0.9
+        self.play(
+            TopXGroup.animate.shift(shift_x_by * UP),
+            TopHalfBGroup.animate.shift((shift_x_by + 0.15) * UP),
+        )
         temp_halfb_minus_c_line = Line(
             start=temp_x_U_line.get_end()
             + (0.5 * self.VALB.get_value() - self.VALX.get_value()) * RIGHT,
-            end=temp_x_U_line.get_end() + dGAP * LEFT,
+            end=temp_x_U_line.get_end() + (2 * dGAP) * LEFT,
             color=COL_HALFB_MINUS_C,
             stroke_width=STROKE_WIDTH,
         )
         self.play(Create(temp_halfb_minus_c_line))
-
-        # self.play(Create(BRectMidGroup)) #!
-        # TODO Sambung mid sqr animation
 
         self.play(
             Transform(label_halfb_L, label_halfb_minus_x[:1]),
             Transform(labelx_U, label_halfb_minus_x[3]),
             FadeIn(label_halfb_minus_x),
         )
-        self.play(temp_halfb_minus_c_line.animate.shift((0.75 + dGAP) * DOWN))
-        # self.KhawaSqrGroup.add(
-        #     BRectLGroup,
-        #     BRectRGroup,
-        #     BRectMidGroup,
-        # )
-
+        self.wait(3)
+        self.play(
+            Uncreate(temp_halfb_L_line),
+            Uncreate(temp_x_U_line),
+        )
+        self.play(
+            temp_halfb_minus_c_line.animate.shift((shift_x_by + dGAP) * DOWN),
+            temp_halfb_minus_c_line.copy().animate.shift(
+                (shift_x_by + dGAP + self.VALX.get_value()) * DOWN
+            ),
+        )
+        self.remove(temp_halfb_minus_c_line)
+        self.KhawaSqrGroup.remove(*self.KhawaSqrGroup[:-1])
+        self.remove(dividerLine)
+        self.add(
+            BRectLGroup,
+            BRectRGroup,
+            BRectMidGroup,
+        )
         self.wait(3)
 
     def solve_geometry(self):
+        # TODO Solve geometry
         main_label = self.labelGroup[:-1]
         free_label = self.labelGroup[-1]
 
